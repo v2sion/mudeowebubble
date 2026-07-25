@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>무더위 버블 타임</title>
+<style>
+  /* ── TDS 토큰 (tmui-components.css 인라인 최소 세트) ── */
+  :root{
+    --font: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    --white:#ffffff;
+    --ink-900:#191F28;--ink-700:#333D4B;--ink-500:#6B7684;--ink-300:#B0B8C1;--ink-100:#E5E8EB;
+    --bg-gray-50:#F9FAFB;--bg-gray-300:#B0B8C1;
+    --mint-050:#F0FDF8;--mint-100:#CCFCE8;--mint-400:#42E6A4;--mint-500:#00B0B9;--mint-700:#007A8C;
+    --toss-blue:#3182F6;--toss-yellow:#FFD600;--toss-red:#F04452;--toss-red-light:#FFECEE;
+    --orange-050:#FFF4E5;--orange-400:#FF9900;--orange-600:#CC7700;
+    --heat-hot:#FF7A00;--heat-veryhot:#FF4500;--heat-extreme:#E3000F;
+    --heat-tropicalnight:#1A1040;
+    --font-size-caption-sm:11px;--font-size-caption:12px;--font-size-body:14px;
+    --font-size-section-title:15px;--font-size-title:18px;
+    --radius-pill:9999px;--radius-lg:16px;--radius-md:12px;
+    --shadow-card:0 2px 12px rgba(25,31,40,.08);
+    --toss-safe-top:env(safe-area-inset-top,0px);
+    --toss-safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .tmui-primary-btn{
+    display:flex;align-items:center;justify-content:center;
+    height:52px;border-radius:var(--radius-md);border:none;cursor:pointer;
+    font-family:var(--font);font-size:var(--font-size-body);font-weight:800;
+    background:linear-gradient(135deg,var(--mint-500),var(--toss-blue));
+    color:var(--white);letter-spacing:-.3px;
+  }
+  .tmui-primary-btn:active{transform:scale(.97)}
+
+  /* ── 레이아웃 ── */
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:var(--font);background:var(--bg-gray-50);color:var(--ink-900);display:flex;justify-content:center}
+  .phone{width:100%;max-width:420px;height:100dvh;background:var(--white);overflow:hidden;position:relative}
+  .screens{display:flex;width:200%;height:100%;z-index:60;transition:transform .38s cubic-bezier(.22,.9,.28,1)}
+  .screen{width:50%;height:100%;position:relative;overflow-y:auto;scrollbar-width:none}
+  .screen::-webkit-scrollbar{display:none}
+
+  /* ── 화면 1: 하늘 (5씬) ── */
+  #s1{
+    overflow:hidden;touch-action:none;transition:background .6s ease;
+    background:
+      radial-gradient(circle at 82% 10%, color-mix(in oklch, var(--toss-yellow) 30%, transparent) 0%, transparent 40%),
+      linear-gradient(180deg,
+        color-mix(in oklch, var(--toss-blue) 22%, white) 0%,
+        color-mix(in oklch, var(--heat-hot) 14%, white) 58%,
+        var(--mint-050) 100%);
+  }
+  #s1.scene-dayMild{
+    background:
+      radial-gradient(circle at 80% 8%, color-mix(in oklch, var(--toss-yellow) 24%, transparent) 0%, transparent 40%),
+      linear-gradient(180deg,
+        color-mix(in oklch, var(--toss-blue) 26%, white) 0%,
+        color-mix(in oklch, var(--mint-400) 20%, white) 58%,
+        var(--mint-050) 100%);
+  }
+  #s1.scene-sunset{
+    background:
+      radial-gradient(circle at 50% 14%, color-mix(in oklch, var(--orange-400) 34%, transparent) 0%, transparent 46%),
+      linear-gradient(180deg,
+        color-mix(in oklch, var(--toss-blue) 26%, white) 0%,
+        color-mix(in oklch, var(--heat-veryhot) 26%, white) 62%,
+        color-mix(in oklch, var(--orange-400) 30%, white) 100%);
+  }
+  #s1.scene-night{
+    background:
+      radial-gradient(circle at 18% 10%, color-mix(in oklch, var(--white) 22%, transparent) 0%, transparent 30%),
+      radial-gradient(circle at 76% 30%, color-mix(in oklch, var(--white) 10%, transparent) 0%, transparent 2%),
+      linear-gradient(180deg,
+        color-mix(in oklch, var(--heat-tropicalnight) 78%, var(--ink-900)) 0%,
+        color-mix(in oklch, var(--heat-tropicalnight) 62%, var(--ink-700)) 58%,
+        color-mix(in oklch, var(--heat-tropicalnight) 40%, var(--ink-500)) 100%);
+  }
+  #s1.scene-nightCool{
+    background:
+      radial-gradient(circle at 18% 10%, color-mix(in oklch, var(--white) 22%, transparent) 0%, transparent 30%),
+      radial-gradient(circle at 76% 30%, color-mix(in oklch, var(--white) 10%, transparent) 0%, transparent 2%),
+      linear-gradient(180deg,
+        color-mix(in oklch, var(--ink-900) 55%, var(--toss-blue)) 0%,
+        color-mix(in oklch, var(--ink-700) 55%, var(--toss-blue)) 58%,
+        color-mix(in oklch, var(--ink-500) 40%, var(--toss-blue)) 100%);
+  }
+  .sky-top{
+    position:absolute;top:0;left:0;right:0;z-index:5;
+    padding:24px 20px 24px;
+    background:linear-gradient(180deg, rgba(255,255,255,.8), transparent);
+  }
+  .sky-dark .sky-top{background:linear-gradient(180deg, rgba(25,31,40,.55), transparent)}
+  .sky-dark .app-title{color:var(--white)}
+  .sky-dark .date-cap{color:var(--ink-100)}
+  .sky-dark .fly-bubble.mine::after{color:var(--ink-100)}
+  .app-title{font-size:var(--font-size-title);font-weight:800;letter-spacing:-.5px}
+  .date-cap{font-size:var(--font-size-caption);color:var(--ink-500);font-weight:700}
+  .mood-summary{
+    margin-top:8px;display:inline-flex;align-items:center;gap:8px;
+    background:rgba(255,255,255,.5);backdrop-filter:blur(8px);
+    border-radius:var(--radius-pill);padding:8px 16px;
+    font-size:var(--font-size-caption);font-weight:700;color:var(--ink-700);
+    box-shadow:var(--shadow-card);
+  }
+  .mood-summary .dot{width:8px;height:8px;border-radius:50%}
+  .sky-filter-cap{
+    margin-top:8px;font-size:var(--font-size-caption-sm);font-weight:700;
+    color:var(--ink-500);min-height:14px;
+  }
+  .sky-dark .sky-filter-cap{color:var(--ink-100)}
+  .heat-widget{
+    margin-top:8px;display:flex;align-items:center;gap:8px;
+    background:
+      linear-gradient(135deg, color-mix(in oklch, var(--heat-extreme) 24%, transparent), color-mix(in oklch, var(--heat-veryhot) 16%, transparent)),
+      rgba(255,255,255,.4);
+    backdrop-filter:blur(10px);
+    border:1px solid color-mix(in oklch, var(--heat-extreme) 26%, transparent);
+    border-radius:var(--radius-lg);padding:12px 16px;cursor:pointer;
+    box-shadow:0 8px 20px color-mix(in oklch, var(--heat-extreme) 16%, transparent);
+    max-width:fit-content;
+  }
+  .heat-widget .hw-main{font-size:var(--font-size-caption);font-weight:800;color:var(--ink-700)}
+  .heat-widget .hw-main b{color:var(--heat-extreme)}
+  .heat-widget .hw-go{font-size:var(--font-size-caption-sm);font-weight:800;color:var(--heat-extreme);white-space:nowrap}
+  .heat-widget .hw-cap{font-size:var(--font-size-caption-sm);font-weight:700;color:var(--ink-500);white-space:nowrap}
+
+  /* ── 방울 스트림 ── */
+  #skyField{position:absolute;inset:0;overflow:hidden}
+  .fly-bubble{
+    position:absolute;bottom:-120px;border-radius:50%;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-size:var(--font-size-body);
+    background:
+      conic-gradient(from 210deg at 50% 50%,
+        rgba(255,255,255,.06) 0deg,
+        color-mix(in oklch, var(--toss-blue) 14%, transparent) 55deg,
+        transparent 120deg,
+        color-mix(in oklch, var(--mint-400) 14%, transparent) 210deg,
+        transparent 280deg,
+        rgba(255,255,255,.1) 360deg),
+      linear-gradient(115deg, transparent 32%, rgba(255,255,255,.6) 46%, transparent 60%),
+      radial-gradient(circle at 28% 24%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.22) 18%, transparent 38%),
+      radial-gradient(circle at 76% 80%, rgba(255,255,255,.26) 0%, transparent 46%),
+      radial-gradient(circle at 50% 58%, color-mix(in oklch, var(--mood, var(--mint-400)) 26%, transparent) 0%, transparent 70%),
+      color-mix(in oklch, var(--mint-400) 14%, rgba(255,255,255,.4));
+    background-size:auto, 250% 250%, auto, auto, auto, auto;
+    background-position:0 0, -60% -60%, 0 0, 0 0, 0 0, 0 0;
+    background-repeat:no-repeat;
+    border:1px solid color-mix(in oklch, var(--mood, var(--mint-400)) 32%, rgba(255,255,255,.85));
+    box-shadow:
+      0 6px 18px color-mix(in oklch, var(--mint-500) 14%, transparent),
+      0 0 18px color-mix(in oklch, var(--mood, var(--mint-500)) 16%, transparent),
+      inset 0 0 10px rgba(255,255,255,.24),
+      inset 0 -6px 10px color-mix(in oklch, var(--toss-blue) 10%, transparent);
+    animation-name:riseAway, bubbleShimmer;
+    animation-timing-function:ease-in-out, linear;
+    animation-iteration-count:1, infinite;
+    animation-fill-mode:forwards, none;
+  }
+  @keyframes bubbleShimmer{
+    0%{background-position:0 0, -60% -60%, 0 0, 0 0, 0 0, 0 0}
+    100%{background-position:0 0, 160% 160%, 0 0, 0 0, 0 0, 0 0}
+  }
+  @keyframes riseAway{
+    0%{transform:translate(0,0) rotate(-3deg) scale(1);opacity:0}
+    6%{opacity:1}
+    22%{transform:translate(var(--dx1,14px), calc(-20dvh - 32px)) rotate(3deg) scale(1.03)}
+    44%{transform:translate(var(--dx2,-16px), calc(-42dvh - 68px)) rotate(-3deg) scale(0.97)}
+    66%{transform:translate(var(--dx3,12px), calc(-64dvh - 104px)) rotate(2deg) scale(1.02)}
+    86%{opacity:1;transform:translate(var(--dx4,-10px), calc(-86dvh - 138px)) rotate(-2deg) scale(0.98)}
+    100%{transform:translate(var(--dx5,8px), calc(-100dvh - 160px)) rotate(2deg) scale(1);opacity:0}
+  }
+  .fly-bubble.mine::after{
+    content:"내 방울";position:absolute;top:-18px;left:50%;transform:translateX(-50%);
+    font-size:var(--font-size-caption-sm);font-weight:800;color:var(--ink-500);white-space:nowrap;
+  }
+  .bubble-pill{
+    position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);
+    max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    background:var(--white);border:1px solid var(--mint-100);
+    padding:4px 12px;border-radius:var(--radius-pill);box-shadow:var(--shadow-card);
+    font-size:var(--font-size-caption);font-weight:600;color:var(--ink-700);
+  }
+
+  /* ── 읽기 카드 ── */
+  .pop-card{
+    position:absolute;z-index:20;left:20px;right:20px;bottom:170px;
+    background:rgba(255,255,255,.96);border-radius:var(--radius-lg);
+    box-shadow:0 16px 40px rgba(25,31,40,.18);padding:16px;
+    display:none;animation:cardIn .28s ease;
+  }
+  @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .pop-card.show{display:block}
+  .pop-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+  .pop-mood{width:12px;height:12px;border-radius:50%}
+  .pop-nick{font-size:var(--font-size-caption);font-weight:800;color:var(--ink-700)}
+  .pop-src{
+    font-size:var(--font-size-caption-sm);font-weight:800;color:var(--orange-600);
+    background:var(--orange-050);border-radius:var(--radius-pill);padding:4px 8px;
+  }
+  .pop-time{font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700;margin-left:auto}
+  .pop-text{font-size:var(--font-size-section-title);font-weight:600;line-height:1.55}
+  .pop-actions{display:flex;gap:8px;margin-top:12px;align-items:center}
+  .like-btn{
+    border:none;cursor:pointer;font-family:var(--font);
+    background:var(--mint-100);color:var(--mint-700);
+    border-radius:var(--radius-pill);padding:8px 16px;font-size:var(--font-size-caption);font-weight:800;
+  }
+  .like-btn.liked{background:linear-gradient(135deg,var(--mint-500),var(--mint-700));color:var(--white)}
+  .report-btn{border:none;background:transparent;color:var(--ink-300);font-size:var(--font-size-caption);font-weight:700;cursor:pointer;margin-left:auto;font-family:var(--font)}
+
+  /* ── 하단 액션 바 ── */
+  .action-bar{position:absolute;left:20px;right:20px;bottom:76px;z-index:10;display:flex;gap:8px}
+  .action-bar .tmui-primary-btn{flex:1}
+  .btn-comment{
+    background:linear-gradient(135deg,var(--mint-500),var(--toss-blue));
+    box-shadow:0 12px 28px color-mix(in oklch, var(--mint-500) 35%, transparent);
+  }
+
+  /* ── 불기 버블 + 완구 ── */
+  .blow-bubble{
+    position:absolute;z-index:4;border-radius:50%;pointer-events:none;
+    transform:translate(-50%,-50%);
+    background:
+      conic-gradient(from 210deg at 50% 50%,
+        rgba(255,255,255,.06) 0deg,
+        color-mix(in oklch, var(--toss-blue) 14%, transparent) 55deg,
+        transparent 120deg,
+        color-mix(in oklch, var(--mint-400) 14%, transparent) 210deg,
+        transparent 280deg,
+        rgba(255,255,255,.1) 360deg),
+      linear-gradient(115deg, transparent 32%, rgba(255,255,255,.6) 46%, transparent 60%),
+      radial-gradient(circle at 28% 24%, rgba(255,255,255,.95) 0%, rgba(255,255,255,.22) 18%, transparent 38%),
+      radial-gradient(circle at 76% 80%, rgba(255,255,255,.26) 0%, transparent 46%),
+      color-mix(in oklch, var(--mint-400) 16%, rgba(255,255,255,.42));
+    background-size:auto, 250% 250%, auto, auto, auto;
+    background-position:0 0, -60% -60%, 0 0, 0 0, 0 0;
+    background-repeat:no-repeat;
+    border:1px solid color-mix(in oklch, var(--mint-500) 34%, rgba(255,255,255,.85));
+    box-shadow:
+      0 6px 18px color-mix(in oklch, var(--mint-500) 14%, transparent),
+      inset 0 0 10px rgba(255,255,255,.22),
+      inset 0 -6px 10px color-mix(in oklch, var(--toss-blue) 10%, transparent);
+    animation:bubbleShimmer 1.8s linear infinite;
+  }
+  .blow-wand{
+    position:absolute;z-index:6;pointer-events:none;
+    transform:translate(-50%,-100%);
+    opacity:.94;filter:drop-shadow(0 4px 10px rgba(25,31,40,.32));
+    transition:opacity .18s ease;
+  }
+  .blow-wand.detached{opacity:0}
+  .pop-droplet{
+    position:absolute;z-index:5;width:7px;height:7px;border-radius:50%;
+    pointer-events:none;transform:translate(-50%,-50%);
+    background:
+      radial-gradient(circle at 30% 28%, rgba(255,255,255,.95) 0%, transparent 60%),
+      color-mix(in oklch, var(--mint-400) 26%, rgba(255,255,255,.5));
+    border:1px solid color-mix(in oklch, var(--mint-500) 40%, rgba(255,255,255,.85));
+  }
+  .pop-shock{
+    position:absolute;z-index:4;border-radius:50%;pointer-events:none;
+    transform:translate(-50%,-50%);
+    border:2px solid color-mix(in oklch, var(--mint-500) 55%, var(--toss-blue));
+  }
+  .blow-hint{
+    position:absolute;left:50%;bottom:138px;transform:translateX(-50%);
+    z-index:9;text-align:center;opacity:.68;pointer-events:none;
+    transition:opacity .4s ease;
+  }
+  .blow-hint.hidden{opacity:0}
+  .blow-hint-cap{
+    display:inline-block;background:rgba(255,255,255,.72);border-radius:var(--radius-md);
+    padding:8px 16px;font-size:var(--font-size-caption-sm);font-weight:700;color:var(--ink-700);
+    line-height:1.5;text-align:center;box-shadow:var(--shadow-card);
+  }
+  .sky-dark .blow-hint-cap{background:rgba(25,31,40,.55);color:var(--ink-100)}
+
+  /* ── 자살/자해 신호 배너 ── */
+  .crisis-banner{
+    display:none;position:absolute;bottom:136px;left:20px;right:20px;z-index:30;
+    background:#FFF4E5;border:1.5px solid var(--orange-400);border-radius:var(--radius-lg);
+    padding:12px 16px;box-shadow:var(--shadow-card);
+  }
+  .crisis-banner.show{display:block}
+  .crisis-banner p{font-size:var(--font-size-caption);font-weight:700;color:var(--ink-700);line-height:1.6}
+  .crisis-banner a{color:var(--orange-600);text-decoration:none;font-weight:800}
+  .crisis-banner button{background:transparent;border:none;font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700;cursor:pointer;float:right;font-family:var(--font)}
+
+  /* ── 한마디 바텀시트 ── */
+  .sheet-overlay{
+    position:absolute;inset:0;z-index:40;background:rgba(25,31,40,.4);
+    display:none;align-items:flex-end;
+  }
+  .sheet-overlay.show{display:flex}
+  .sheet{
+    width:100%;background:var(--white);border-radius:var(--radius-md) var(--radius-md) 0 0;
+    padding:24px 20px 24px;animation:sheetUp .3s ease;
+  }
+  @keyframes sheetUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .sheet-title{font-size:var(--font-size-title);font-weight:800;margin-bottom:4px}
+  .sheet-sub{font-size:var(--font-size-caption);color:var(--ink-500);font-weight:600;margin-bottom:16px}
+  .section-cap{font-size:var(--font-size-caption);font-weight:700;color:var(--ink-300);margin:16px 4px 8px;letter-spacing:.4px}
+  .mood-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .mood-chip{
+    border:1.5px solid var(--ink-100);border-radius:var(--radius-md);
+    background:var(--white);padding:8px 4px;text-align:center;cursor:pointer;
+    font-family:var(--font);font-size:var(--font-size-caption);font-weight:700;color:var(--ink-500);
+  }
+  .mood-chip .mc-dot{width:12px;height:12px;border-radius:50%;margin:0 auto 4px}
+  .mood-chip.on{border-color:var(--mood-c);background:color-mix(in oklch, var(--mood-c) 8%, white);color:var(--ink-900)}
+  .write-box{position:relative}
+  .write-input{
+    width:100%;border:1.5px solid var(--ink-100);border-radius:var(--radius-md);
+    padding:12px 16px;font-family:var(--font);font-size:var(--font-size-body);font-weight:600;
+    outline:none;resize:none;height:58px;background:var(--white);
+  }
+  .write-input:focus{border-color:var(--mint-500)}
+  .char-cnt{position:absolute;right:12px;bottom:12px;font-size:var(--font-size-caption-sm);font-weight:700;color:var(--ink-300)}
+  .char-cnt.over{color:var(--toss-red)}
+  .filter-warn{display:none;margin-top:8px;font-size:var(--font-size-caption);font-weight:700;color:var(--toss-red)}
+  .filter-warn.show{display:block}
+  .sheet-submit{
+    width:100%;margin-top:16px;
+    background:linear-gradient(135deg,var(--mint-500),var(--toss-blue));
+    box-shadow:0 12px 28px color-mix(in oklch, var(--mint-500) 35%, transparent);
+  }
+  .sheet-submit:disabled{opacity:.45}
+  .cooldown-note{margin-top:12px;font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700;line-height:1.6}
+
+  /* ── 화면 2: 내 방울함 ── */
+  #s2{padding:20px 18px 96px;background:linear-gradient(180deg,var(--mint-050),var(--white) 34%)}
+  .me-hero{
+    background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);
+    padding:16px;display:flex;justify-content:space-between;align-items:center;
+  }
+  .me-hero .nick{font-size:var(--font-size-title);font-weight:800}
+  .me-hero .sub{font-size:var(--font-size-caption);color:var(--ink-500);font-weight:700;margin-top:4px}
+  .me-hero .likes{text-align:right}
+  .me-hero .likes b{font-size:22px;color:var(--mint-700)}
+  .me-hero .likes span{display:block;font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700}
+  .week-card{
+    background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);
+    padding:16px;margin-top:12px;
+  }
+  .week-title{font-size:var(--font-size-section-title);font-weight:700;margin-bottom:12px}
+  .week-bar{display:flex;height:14px;border-radius:var(--radius-pill);overflow:hidden}
+  .week-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+  .week-legend span{font-size:var(--font-size-caption-sm);font-weight:700;color:var(--ink-500);display:inline-flex;align-items:center;gap:4px}
+  .week-legend i{width:8px;height:8px;border-radius:50%}
+  .blow-count-card{
+    display:flex;align-items:center;gap:8px;margin-top:12px;
+    background:var(--mint-050);border:1px dashed var(--mint-100);
+    border-radius:var(--radius-md);padding:12px 16px;
+    font-size:var(--font-size-body);font-weight:600;color:var(--ink-700);
+  }
+  .my-bubble-row{
+    background:var(--white);border-radius:var(--radius-md);box-shadow:var(--shadow-card);
+    padding:12px 16px;margin-top:8px;display:flex;gap:8px;align-items:center;
+  }
+  .my-bubble-row .bd{width:14px;height:14px;border-radius:50%;flex:0 0 auto}
+  .my-bubble-row p{flex:1;font-size:var(--font-size-body);font-weight:600;color:var(--ink-700);line-height:1.5}
+  .my-bubble-row .meta{font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700;white-space:nowrap}
+  .my-bubble-row.gone{opacity:.55}
+  .my-bubble-row.gone .meta::after{content:" · 소멸됨"}
+
+  /* ── 하단 내비 ── */
+  .app-nav{
+    position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:50;
+    display:flex;gap:4px;
+    background:color-mix(in oklch, var(--ink-900) 58%, transparent);
+    backdrop-filter:blur(10px);
+    border-radius:var(--radius-pill);
+    padding:8px;box-shadow:0 10px 24px rgba(25,31,40,.28);
+    transition:opacity .25s ease;
+  }
+  .app-nav.dimmed{opacity:0;pointer-events:none}
+  .app-nav button{
+    border:none;background:transparent;color:var(--bg-gray-300);
+    font-family:var(--font);font-size:var(--font-size-caption-sm);font-weight:700;white-space:nowrap;
+    padding:8px 12px;border-radius:var(--radius-pill);cursor:pointer;
+  }
+  .app-nav button.on{background:linear-gradient(135deg,var(--mint-500),var(--mint-700));color:var(--white)}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="screens" id="screens">
+
+    <!-- ====== 화면 1: 하늘 ====== -->
+    <section class="screen" id="s1">
+      <div id="skyField"></div>
+
+      <div class="sky-top">
+        <div class="app-title">무더위 버블 타임 🫧</div>
+        <div class="sky-filter-cap" id="skyFilterCap"></div>
+        <div class="date-cap" id="skyCap">방울은 하늘로 날아가 사라져요</div>
+        <div class="mood-summary" id="moodSummary">
+          <span class="dot" id="moodSummaryDot"></span>지금 하늘엔 <b id="moodSummaryLabel"></b>이 <span id="moodSummaryPct"></span>% — <span id="moodSummaryTip"></span>
+        </div>
+        <div class="heat-widget" id="heatWidget">
+          <span>🔥</span>
+          <span class="hw-main" id="heatWidgetMain">지금 전국 1위 <b id="heatWidgetCity">로딩 중…</b></span>
+          <span class="hw-go">무더위 체감 랭킹에서 보기 →<br><span class="hw-cap">미니앱으로 이동해요</span></span>
+        </div>
+      </div>
+
+      <div class="blow-hint" id="blowHint">
+        <svg width="40" height="52" viewBox="0 0 40 52" style="display:block;margin:0 auto 4px">
+          <defs>
+            <linearGradient id="wandHandleH" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#EAF4FF"/>
+              <stop offset="50%" stop-color="#BFE3FF"/>
+              <stop offset="100%" stop-color="#8FCBEF"/>
+            </linearGradient>
+            <linearGradient id="wandRingH" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FFFFFF"/>
+              <stop offset="40%" stop-color="var(--mint-400)"/>
+              <stop offset="100%" stop-color="var(--mint-700)"/>
+            </linearGradient>
+            <radialGradient id="wandFilmH" cx="34%" cy="28%" r="75%">
+              <stop offset="0%" stop-color="#fff" stop-opacity="0.95"/>
+              <stop offset="42%" stop-color="#fff" stop-opacity="0.2"/>
+              <stop offset="78%" stop-color="var(--toss-blue)" stop-opacity="0.1"/>
+              <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+          <rect x="17.4" y="29" width="5.2" height="21" rx="2.4" fill="url(#wandHandleH)"/>
+          <rect x="18.3" y="30.5" width="1.1" height="17.5" rx="0.5" fill="#fff" opacity=".55"/>
+          <rect x="16.4" y="26" width="7.2" height="5" rx="2" fill="#7FBCE0"/>
+          <circle cx="20" cy="15" r="13" fill="url(#wandFilmH)"/>
+          <circle cx="20" cy="15" r="13" fill="none" stroke="url(#wandRingH)" stroke-width="2.6"/>
+          <ellipse cx="15.3" cy="9.3" rx="4.6" ry="2.1" fill="#fff" opacity=".7" transform="rotate(-25 15.3 9.3)"/>
+        </svg>
+        <span class="blow-hint-cap">🫧 비눗방울을 후— 크게 불어보아요<br>(화면 꾹 눌러보기)</span>
+      </div>
+
+      <div class="pop-card" id="popCard">
+        <div class="pop-head">
+          <span class="pop-mood" id="popMood"></span>
+          <span class="pop-nick" id="popNick"></span>
+          <span class="pop-src" id="popSrc" style="display:none">🔥 무더위 체감 랭킹에서 온 방울</span>
+          <span class="pop-time" id="popTime"></span>
+        </div>
+        <div class="pop-text" id="popText"></div>
+        <div class="pop-actions">
+          <button class="like-btn" id="likeBtn">✨ 공감 <span id="likeCnt"></span></button>
+          <button class="report-btn" id="reportBtn">신고</button>
+        </div>
+      </div>
+
+      <div class="crisis-banner" id="crisisBanner">
+        <button onclick="document.getElementById('crisisBanner').classList.remove('show')">닫기</button>
+        <p>힘드신가요? 혼자 견디지 않아도 돼요.<br>
+          <a href="tel:1393">자살예방상담 1393</a> ·
+          <a href="tel:15770199">정신건강 1577-0199</a>
+        </p>
+      </div>
+
+      <div class="action-bar">
+        <button class="tmui-primary-btn btn-comment" id="btnComment">💬 비눗방울에 내 마음 담기</button>
+      </div>
+
+      <div class="sheet-overlay" id="sheetOverlay">
+        <div class="sheet">
+          <div class="sheet-title">비눗방울에 내 마음 담기</div>
+          <div class="sheet-sub">작은 방울에 담겨 하늘로 날아가요 · 24시간 뒤 사라져요</div>
+          <div class="section-cap">지금 기분</div>
+          <div class="mood-grid" id="moodGrid"></div>
+          <div class="section-cap">한 줄 (선택 · 20자)</div>
+          <div class="write-box">
+            <textarea class="write-input" id="writeInput" placeholder="지금 내 기분을 표현해보세요" maxlength="20"></textarea>
+            <span class="char-cnt" id="charCnt">0/20</span>
+          </div>
+          <div class="filter-warn" id="filterWarn">이 표현은 방울에 담을 수 없어요</div>
+          <button class="tmui-primary-btn sheet-submit" id="submitBtn">후— 하늘로 띄우기</button>
+          <div class="cooldown-note">🕐 마음 방울은 10분에 1개 · 후— 불기는 무제한이에요</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== 화면 2: 내 방울함 ====== -->
+    <section class="screen" id="s2">
+      <div class="app-title" style="margin-bottom:16px">내 방울함</div>
+
+      <div class="me-hero">
+        <div>
+          <div class="nick" id="meNick">불러오는 중…</div>
+          <div class="sub">이번 주 방울 <span id="meWeekCount">0</span>개 · <u style="cursor:pointer" id="rerollBtn">닉네임 바꾸기</u></div>
+        </div>
+        <div class="likes"><b id="meTotalLikes">0</b><span>받은 공감</span></div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-title">이번 주 당신의 하늘</div>
+        <div class="week-bar" id="weekBar"></div>
+        <div class="week-legend" id="weekLegend"></div>
+        <div id="weekComment" style="font-size:var(--font-size-caption);color:var(--ink-500);font-weight:600;margin-top:12px"></div>
+      </div>
+
+      <div class="blow-count-card" id="blowCountCard" style="display:none">
+        <span>🫧</span>
+        <span id="blowCountText"></span>
+      </div>
+
+      <div class="section-cap">마음 방울 (나에게만 보여요 · 30일 보관)</div>
+      <div id="myList"></div>
+      <div style="font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700;margin-top:16px;line-height:1.6">
+        방울을 길게 누르면 즉시 삭제할 수 있어요. 소멸된 방울은 나에게만 30일간 보이고 이후 완전히 삭제돼요.
+      </div>
+    </section>
+
+  </div>
+
+  <nav class="app-nav" id="appNav">
+    <button class="on" id="tabAll">모두의 하늘</button>
+    <button id="tabLocal">우리 동네 하늘</button>
+    <button id="tabMe">내 방울함</button>
+  </nav>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

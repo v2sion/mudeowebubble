@@ -1,0 +1,18 @@
+name: Cleanup old bubbles
+
+on:
+  schedule:
+    # 매일 00:05 KST (= 15:05 UTC)
+    - cron: '5 15 * * *'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call cleanup API
+        run: |
+          curl -sf -X POST https://mudeowebubble.vercel.app/api/cleanup \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}" \
+            -H "Content-Type: application/json" \
+            | jq .
