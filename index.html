@@ -94,6 +94,12 @@
   .sky-dark .app-title{color:var(--white)}
   .sky-dark .date-cap{color:var(--ink-100)}
   .sky-dark .fly-bubble.mine::after{color:var(--ink-100)}
+  .sky-dark .mood-summary{background:rgba(255,255,255,.92);color:var(--ink-900)}
+  .sky-dark .heat-widget{
+    background:
+      linear-gradient(135deg, color-mix(in oklch, var(--heat-extreme) 28%, transparent), color-mix(in oklch, var(--heat-veryhot) 20%, transparent)),
+      rgba(255,255,255,.72);
+  }
   .app-title{font-size:var(--font-size-title);font-weight:800;letter-spacing:-.5px}
   .date-cap{font-size:var(--font-size-caption);color:var(--ink-500);font-weight:700}
   .mood-summary{

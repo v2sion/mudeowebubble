@@ -5,6 +5,7 @@ import {
   closeView,
   openURL,
   saveBase64Data,
+  getCurrentLocation,
 } from '@apps-in-toss/web-framework';
 import html2canvas from 'html2canvas-pro';
 
@@ -129,6 +130,12 @@ let locationConsent = null;
 let myRegion = null;
 
 async function requestLocation() {
+  // 토스 앱 환경: SDK 브릿지 우선 사용
+  try {
+    const loc = await getCurrentLocation({ accuracy: 'FINE' });
+    return { latitude: loc.latitude, longitude: loc.longitude };
+  } catch (_) {}
+  // 브라우저 개발 환경 폴백
   return new Promise((resolve, reject) => {
     if (!navigator.geolocation) { reject(new Error('미지원')); return; }
     navigator.geolocation.getCurrentPosition(
