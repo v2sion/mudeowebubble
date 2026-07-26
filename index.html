@@ -233,6 +233,7 @@
   /* ── 불기 버블 + 완구 ── */
   .blow-bubble{
     position:absolute;z-index:4;border-radius:50%;pointer-events:none;
+    will-change:transform,opacity;
     transform:translate(-50%,-50%);
     background:
       conic-gradient(from 210deg at 50% 50%,
@@ -257,8 +258,8 @@
     animation:bubbleShimmer 1.8s linear infinite;
   }
   .blow-wand{
-    position:absolute;z-index:6;pointer-events:none;
-    transform:translate(-50%,-100%);
+    position:absolute;left:0;top:0;z-index:6;pointer-events:none;
+    will-change:transform;
     opacity:.94;filter:drop-shadow(0 4px 10px rgba(25,31,40,.32));
     transition:opacity .18s ease;
   }

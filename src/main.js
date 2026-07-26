@@ -408,7 +408,7 @@ function wandSVG() {
 }
 
 function popBubble(rec) {
-  clearInterval(rec.timer);
+  cancelAnimationFrame(rec.rafId);
   rec.wand.classList.add('detached');
   setTimeout(() => { if (rec.wand.isConnected) rec.wand.remove(); }, 220);
   const cx = parseFloat(rec.el.style.left), cy = parseFloat(rec.el.style.top);
@@ -456,7 +456,7 @@ function skyBlowStart(e) {
   const touchX = e.clientX - rect.left, touchY = e.clientY - rect.top;
   const wand = document.createElement('div');
   wand.className = 'blow-wand';
-  wand.style.cssText = `left:${touchX}px; top:${touchY}px;`;
+  wand.style.transform = `translate(calc(${touchX}px - 50%), calc(${touchY}px - 100%))`;
   wand.innerHTML = wandSVG();
   $('s1').appendChild(wand);
   const sitX = touchX, sitY = touchY - WAND_RING_OFFSET;
@@ -466,23 +466,26 @@ function skyBlowStart(e) {
   $('s1').appendChild(el);
   const start = performance.now();
   const pid = e.pointerId;
-  const timer = setInterval(() => {
-    const rec = activeBlows.get(pid);
-    if (!rec) return;
+  const rec = { el, wand, start, rafId: null, x: sitX, y: sitY, size: 16 };
+  activeBlows.set(pid, rec);
+  function grow() {
+    const r = activeBlows.get(pid);
+    if (!r) return;
     const s = blowSize(performance.now() - start);
     if (s >= POP_SIZE) {
-      popBubble(rec);
+      popBubble(r);
       activeBlows.delete(pid);
       blowCount++; renderBlowCount();
       if (activeBlows.size === 0) showHint();
       return;
     }
-    rec.size = s;
-    rec.el.style.width = rec.el.style.height = s + 'px';
-    rec.el.style.left = rec.x + 'px';
-    rec.el.style.top = (rec.y - s / 2) + 'px';
-  }, 50);
-  activeBlows.set(pid, { el, wand, start, timer, x: sitX, y: sitY, size: 16 });
+    r.size = s;
+    r.el.style.width = r.el.style.height = s + 'px';
+    r.el.style.left = r.x + 'px';
+    r.el.style.top = (r.y - s / 2) + 'px';
+    r.rafId = requestAnimationFrame(grow);
+  }
+  rec.rafId = requestAnimationFrame(grow);
 }
 function skyBlowMove(e) {
   const b = activeBlows.get(e.pointerId);
@@ -490,8 +493,7 @@ function skyBlowMove(e) {
   const rect = $('s1').getBoundingClientRect();
   const touchX = e.clientX - rect.left, touchY = e.clientY - rect.top;
   b.x = touchX; b.y = touchY - WAND_RING_OFFSET;
-  b.wand.style.left = touchX + 'px';
-  b.wand.style.top = touchY + 'px';
+  b.wand.style.transform = `translate(calc(${touchX}px - 50%), calc(${touchY}px - 100%))`;
   b.el.style.left = b.x + 'px';
   b.el.style.top = (b.y - (b.size || 16) / 2) + 'px';
 }
@@ -500,7 +502,7 @@ function skyBlowEnd(e) {
   if (!b) return;
   activeBlows.delete(e.pointerId);
   if (activeBlows.size === 0) showHint();
-  clearInterval(b.timer);
+  cancelAnimationFrame(b.rafId);
   const size = blowSize(performance.now() - b.start);
   blowCount++; renderBlowCount();
   b.el.style.width = b.el.style.height = size + 'px';
