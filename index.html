@@ -412,6 +412,52 @@
   }
   .app-nav button.on{background:linear-gradient(135deg,var(--mint-500),var(--mint-700));color:var(--white)}
 
+  /* ── 위치 동의 모달 (.phone 직하, z-index 70) ── */
+  .loc-modal-wrap{
+    position:absolute;inset:0;z-index:70;
+    background:rgba(25,31,40,.52);
+    display:none;align-items:flex-end;
+  }
+  .loc-modal-wrap.show{display:flex}
+  .loc-modal-sheet{
+    width:100%;background:var(--white);border-radius:24px 24px 0 0;
+    padding:0 20px calc(var(--toss-safe-bottom) + 28px);
+    animation:sheetSpring .42s cubic-bezier(.34,1.4,.64,1);
+    text-align:center;
+  }
+  .loc-drag-handle{
+    width:40px;height:4px;background:var(--ink-100);border-radius:2px;
+    margin:16px auto 24px;
+  }
+  .loc-icon{font-size:44px;margin-bottom:12px;line-height:1}
+  .loc-title{
+    font-size:var(--font-size-title);font-weight:800;color:var(--ink-900);margin-bottom:8px;
+  }
+  .loc-desc{
+    font-size:var(--font-size-body);color:var(--ink-500);font-weight:600;
+    line-height:1.65;margin-bottom:20px;word-break:keep-all;
+  }
+  .loc-list{
+    list-style:none;background:var(--bg-gray-50);border-radius:var(--radius-md);
+    padding:14px 16px;margin-bottom:20px;text-align:left;
+  }
+  .loc-list li{
+    display:flex;gap:12px;padding:5px 0;
+    font-size:var(--font-size-caption);font-weight:600;
+  }
+  .loc-key{color:var(--ink-300);min-width:58px;font-weight:700;flex-shrink:0}
+  .loc-val{color:var(--ink-700);word-break:keep-all;line-height:1.55}
+  .loc-agree-btn{
+    width:100%;
+    background:linear-gradient(135deg,var(--mint-500),var(--toss-blue));
+    box-shadow:0 12px 28px color-mix(in oklch, var(--mint-500) 35%, transparent);
+  }
+  .loc-deny-btn{
+    width:100%;padding:14px;margin-top:4px;border:none;background:transparent;
+    font-family:var(--font);font-size:var(--font-size-body);font-weight:700;
+    color:var(--ink-300);cursor:pointer;
+  }
+
   /* ── 힌트 펄스 애니메이션 ── */
   @keyframes pulseWand{
     0%,100%{transform:scale(1)}
@@ -523,17 +569,6 @@
       </div>
     </section>
 
-    <!-- ====== 위치 정보 수집 동의 모달 ====== -->
-    <div class="sheet-overlay" id="locConsentOverlay">
-      <div class="sheet">
-        <div class="sheet-title">📍 위치 정보 수집 동의</div>
-        <div class="sheet-sub">우리 동네 하늘 탭을 이용하려면 위치 정보가 필요해요</div>
-        <p style="font-size:var(--font-size-caption);color:var(--ink-700);font-weight:600;line-height:1.8;background:var(--bg-gray-50);border-radius:var(--radius-md);padding:12px 14px;margin:8px 0 16px;word-break:keep-all"><b>수집 항목:</b> 위치 정보 (위도·경도)<br><b>수집 목적:</b> 내 동네 하늘 방울 필터링<br><b>보유 기간:</b> 즉시 파기 (지역명만 임시 사용)</p>
-        <button class="tmui-primary-btn" id="locConsentAgree">동의하고 내 동네 하늘 보기</button>
-        <button id="locConsentDeny" style="width:100%;margin-top:12px;padding:12px;border:none;background:transparent;font-family:var(--font);font-size:var(--font-size-body);font-weight:700;color:var(--ink-500);cursor:pointer">거부 (가장 핫한 하늘 보기)</button>
-      </div>
-    </div>
-
     <!-- ====== 화면 2: 내 방울함 ====== -->
     <section class="screen" id="s2">
       <div class="app-title" style="margin-bottom:16px">내 방울함</div>
@@ -572,6 +607,23 @@
     <button id="tabLocal">우리 동네 하늘</button>
     <button id="tabMe">내 방울함</button>
   </nav>
+
+  <!-- ====== 위치 정보 이용 동의 (phone 직하, z-index 70) ====== -->
+  <div class="loc-modal-wrap" id="locConsentOverlay">
+    <div class="loc-modal-sheet">
+      <div class="loc-drag-handle"></div>
+      <div class="loc-icon">📍</div>
+      <h2 class="loc-title">위치 정보 이용 동의</h2>
+      <p class="loc-desc">우리 동네 하늘의 방울들을 보려면<br>위치 정보 접근이 필요해요</p>
+      <ul class="loc-list">
+        <li><span class="loc-key">수집 항목</span><span class="loc-val">위치 정보 (위도·경도)</span></li>
+        <li><span class="loc-key">수집 목적</span><span class="loc-val">내 동네 하늘 방울 필터링</span></li>
+        <li><span class="loc-key">보유 기간</span><span class="loc-val">즉시 파기 (지역명만 임시 사용)</span></li>
+      </ul>
+      <button class="tmui-primary-btn loc-agree-btn" id="locConsentAgree">동의하고 내 동네 하늘 보기</button>
+      <button class="loc-deny-btn" id="locConsentDeny">거부하기</button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="/src/main.js"></script>
