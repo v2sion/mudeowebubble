@@ -538,7 +538,15 @@ function renderMoodGrid() {
 
 $('moodGrid').addEventListener('click', e => {
   const btn = e.target.closest('[data-mood]');
-  if (btn) { selMood = btn.dataset.mood; renderMoodGrid(); }
+  if (btn) {
+    selMood = btn.dataset.mood;
+    renderMoodGrid();
+    const onChip = $('moodGrid').querySelector('.mood-chip.on');
+    if (onChip) {
+      onChip.classList.add('bounce');
+      onChip.addEventListener('animationend', () => onChip.classList.remove('bounce'), { once: true });
+    }
+  }
 });
 
 function openSheet() { hidePop(); $('sheetOverlay').classList.add('show'); updateNavVisibility(); }
