@@ -97,13 +97,14 @@
   .app-title{font-size:var(--font-size-title);font-weight:800;letter-spacing:-.5px}
   .date-cap{font-size:var(--font-size-caption);color:var(--ink-500);font-weight:700}
   .mood-summary{
-    margin-top:8px;display:inline-flex;align-items:center;gap:8px;
+    margin-top:8px;display:flex;align-items:flex-start;gap:8px;max-width:fit-content;
     background:rgba(255,255,255,.5);backdrop-filter:blur(8px);
-    border-radius:var(--radius-pill);padding:8px 16px;
+    border-radius:var(--radius-lg);padding:8px 16px;
     font-size:var(--font-size-caption);font-weight:700;color:var(--ink-700);
-    box-shadow:var(--shadow-card);
+    box-shadow:var(--shadow-card);line-height:1.6;
   }
-  .mood-summary .dot{width:8px;height:8px;border-radius:50%}
+  .mood-summary .dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;margin-top:4px}
+  .mood-summary-text{word-break:keep-all}
   .sky-filter-cap{
     margin-top:8px;font-size:var(--font-size-caption-sm);font-weight:700;
     color:var(--ink-500);min-height:14px;
@@ -199,7 +200,7 @@
     background:var(--orange-050);border-radius:var(--radius-pill);padding:4px 8px;
   }
   .pop-time{font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700;margin-left:auto}
-  .pop-text{font-size:var(--font-size-section-title);font-weight:600;line-height:1.55}
+  .pop-text{font-size:var(--font-size-section-title);font-weight:600;line-height:1.55;word-break:keep-all}
   .pop-actions{display:flex;gap:8px;margin-top:12px;align-items:center}
   .like-btn{
     border:none;cursor:pointer;font-family:var(--font);
@@ -272,7 +273,8 @@
   .blow-hint-cap{
     display:inline-block;background:rgba(255,255,255,.72);border-radius:var(--radius-md);
     padding:8px 16px;font-size:var(--font-size-caption-sm);font-weight:700;color:var(--ink-700);
-    line-height:1.5;text-align:center;box-shadow:var(--shadow-card);
+    line-height:1.5;text-align:center;box-shadow:var(--shadow-card);word-break:keep-all;
+    animation:pulseCap 2.4s ease-in-out infinite;animation-delay:.5s;
   }
   .sky-dark .blow-hint-cap{background:rgba(25,31,40,.55);color:var(--ink-100)}
 
@@ -359,7 +361,7 @@
     padding:12px 16px;margin-top:8px;display:flex;gap:8px;align-items:center;
   }
   .my-bubble-row .bd{width:14px;height:14px;border-radius:50%;flex:0 0 auto}
-  .my-bubble-row p{flex:1;font-size:var(--font-size-body);font-weight:600;color:var(--ink-700);line-height:1.5}
+  .my-bubble-row p{flex:1;font-size:var(--font-size-body);font-weight:600;color:var(--ink-700);line-height:1.5;word-break:keep-all}
   .my-bubble-row .meta{font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700;white-space:nowrap}
   .my-bubble-row.gone{opacity:.55}
   .my-bubble-row.gone .meta::after{content:" · 소멸됨"}
@@ -381,6 +383,20 @@
     padding:8px 12px;border-radius:var(--radius-pill);cursor:pointer;
   }
   .app-nav button.on{background:linear-gradient(135deg,var(--mint-500),var(--mint-700));color:var(--white)}
+
+  /* ── 힌트 펄스 애니메이션 ── */
+  @keyframes pulseWand{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.12) translateY(-3px)}
+  }
+  @keyframes pulseCap{
+    0%,100%{box-shadow:var(--shadow-card)}
+    50%{box-shadow:0 4px 18px rgba(0,176,185,.38)}
+  }
+  .blow-hint:not(.hidden) svg{
+    animation:pulseWand 2.4s ease-in-out infinite;
+    transform-origin:center bottom;
+  }
 </style>
 </head>
 <body>
@@ -396,7 +412,7 @@
         <div class="sky-filter-cap" id="skyFilterCap"></div>
         <div class="date-cap" id="skyCap">방울은 하늘로 날아가 사라져요</div>
         <div class="mood-summary" id="moodSummary">
-          <span class="dot" id="moodSummaryDot"></span>지금 하늘엔 <b id="moodSummaryLabel"></b>이 <span id="moodSummaryPct"></span>% — <span id="moodSummaryTip"></span>
+          <span class="dot" id="moodSummaryDot"></span><span class="mood-summary-text">지금 하늘엔 <b id="moodSummaryLabel"></b>이 <span id="moodSummaryPct"></span>% — <span id="moodSummaryTip"></span></span>
         </div>
         <div class="heat-widget" id="heatWidget">
           <span>🔥</span>
@@ -478,6 +494,17 @@
         </div>
       </div>
     </section>
+
+    <!-- ====== 위치 정보 수집 동의 모달 ====== -->
+    <div class="sheet-overlay" id="locConsentOverlay">
+      <div class="sheet">
+        <div class="sheet-title">📍 위치 정보 수집 동의</div>
+        <div class="sheet-sub">우리 동네 하늘 탭을 이용하려면 위치 정보가 필요해요</div>
+        <p style="font-size:var(--font-size-caption);color:var(--ink-700);font-weight:600;line-height:1.8;background:var(--bg-gray-50);border-radius:var(--radius-md);padding:12px 14px;margin:8px 0 16px;word-break:keep-all"><b>수집 항목:</b> 위치 정보 (위도·경도)<br><b>수집 목적:</b> 내 동네 하늘 방울 필터링<br><b>보유 기간:</b> 즉시 파기 (지역명만 임시 사용)</p>
+        <button class="tmui-primary-btn" id="locConsentAgree">동의하고 내 동네 하늘 보기</button>
+        <button id="locConsentDeny" style="width:100%;margin-top:12px;padding:12px;border:none;background:transparent;font-family:var(--font);font-size:var(--font-size-body);font-weight:700;color:var(--ink-500);cursor:pointer">거부 (가장 핫한 하늘 보기)</button>
+      </div>
+    </div>
 
     <!-- ====== 화면 2: 내 방울함 ====== -->
     <section class="screen" id="s2">

@@ -53,7 +53,7 @@ function initSafeArea() {
 // ── 기분 팔레트 ─────────────────────────────────────────────────
 const MOODS = [
   { key: 'joy',     label: '기쁨',   emoji: '😊', color: 'var(--toss-yellow)',    tip: '다들 기분 좋은 하루를 보내고 있나 봐요' },
-  { key: 'flutter', label: '설렘',   emoji: '🥰', color: 'var(--toss-red-light)', tip: '설레는 방울이 유독 많은 하늘이에요' },
+  { key: 'flutter', label: '설렘',   emoji: '🥰', color: '#F06292',              tip: '설레는 방울이 유독 많은 하늘이에요' },
   { key: 'calm',    label: '평온',   emoji: '😌', color: 'var(--mint-400)',        tip: '평온한 방울이 하늘을 채우고 있어요' },
   { key: 'tired',   label: '피곤',   emoji: '😮‍💨', color: 'var(--bg-gray-300)',   tip: '다들 지친 하루를 보내고 있나 봐요' },
   { key: 'blue',    label: '우울',   emoji: '😔', color: 'var(--toss-blue)',       tip: '조금 가라앉은 방울이 많은 하늘이에요' },
@@ -139,6 +139,22 @@ async function requestLocation() {
   });
 }
 
+function showLocConsentModal() {
+  return new Promise(resolve => {
+    $('locConsentOverlay').classList.add('show');
+    const agree = $('locConsentAgree');
+    const deny  = $('locConsentDeny');
+    function cleanup(val) {
+      $('locConsentOverlay').classList.remove('show');
+      agree.onclick = null;
+      deny.onclick  = null;
+      resolve(val);
+    }
+    agree.onclick = () => cleanup(true);
+    deny.onclick  = () => cleanup(false);
+  });
+}
+
 async function selectSkyTab(mode) {
   if (mode === 'all') {
     skyMode = 'all';
@@ -147,16 +163,21 @@ async function selectSkyTab(mode) {
     return;
   }
   if (locationConsent === null) {
-    try {
-      const coords = await requestLocation();
-      locationConsent = true;
+    const agreed = await showLocConsentModal();
+    if (agreed) {
       try {
-        const data = await apiFetch(`/api/nearest-region?lat=${coords.latitude}&lon=${coords.longitude}`);
-        myRegion = data.city?.nameKo || null;
+        const coords = await requestLocation();
+        locationConsent = true;
+        try {
+          const data = await apiFetch(`/api/nearest-region?lat=${coords.latitude}&lon=${coords.longitude}`);
+          myRegion = data.city?.nameKo || null;
+        } catch (_) {
+          myRegion = null;
+        }
       } catch (_) {
-        myRegion = null;
+        locationConsent = false;
       }
-    } catch (_) {
+    } else {
       locationConsent = false;
     }
   }
