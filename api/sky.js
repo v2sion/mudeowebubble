@@ -35,7 +35,8 @@ export default async function handler(req, res) {
   for (let i = 0; i < ids.length; i++) {
     const b = results[i];
     if (!b || b.hidden === '1' || b.hidden === 1) continue;
-    if (region && b.region !== region) continue;
+    // region 없는 방울(기존 데이터)은 항상 포함, region 있는 방울은 지역 일치만 포함
+    if (region && b.region && b.region !== region) continue;
     bubbles.push({
       id: ids[i],
       mood: b.mood,

@@ -188,8 +188,16 @@ async function selectSkyTab(mode) {
     const agreed = await showLocConsentModal();
     if (agreed) {
       try {
-        await fetchRegionSilent();
-        locationConsent = myRegion ? true : false;
+        const coords = await requestLocation();
+        locationConsent = true; // 좌표 취득 성공 → 동의 확정 (region 조회 실패와 무관)
+        try {
+          const data = await apiFetch(`/api/nearest-region?lat=${coords.latitude}&lon=${coords.longitude}`);
+          myRegion = data.city?.nameKo || null;
+          if (myRegion && data.city?.sido) {
+            const sidoShort = data.city.sido.replace(/(특별시|광역시|특별자치시|특별자치도|도)$/, '');
+            myRegionDisplay = sidoShort ? `${sidoShort} ${myRegion}` : myRegion;
+          }
+        } catch (_) { myRegion = null; }
       } catch (_) {
         locationConsent = false;
       }
@@ -290,7 +298,8 @@ function sizeFromText(text) {
 function getActivePool() {
   if (skyMode !== 'local') return skyPool;
   if (locationConsent === true && myRegion) {
-    const filtered = skyPool.filter(p => p.region === myRegion);
+    // region 없는 방울(기존 데이터)은 포함, region 있는 방울은 지역 일치만 포함
+    const filtered = skyPool.filter(p => !p.region || p.region === myRegion);
     return filtered.length ? filtered : skyPool;
   }
   // 거부 시: 방울 수 가장 많은 지역
