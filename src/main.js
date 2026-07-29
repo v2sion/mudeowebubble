@@ -131,10 +131,12 @@ let myRegion = null;        // 구 단위 (필터·저장용, e.g. "마포구")
 let myRegionDisplay = null; // 표시용 (e.g. "서울 마포구")
 
 async function requestLocation() {
-  // 토스 앱 환경: SDK 브릿지 우선 사용
+  // COARSE = 네트워크 기반, 구 단위 정밀도로 충분하고 GPS보다 빠름
   try {
-    const loc = await getCurrentLocation({ accuracy: 'FINE' });
-    return { latitude: loc.latitude, longitude: loc.longitude };
+    const loc = await withTimeout(getCurrentLocation({ accuracy: 'COARSE' }), 10000);
+    if (loc?.latitude != null && loc?.longitude != null) {
+      return { latitude: loc.latitude, longitude: loc.longitude };
+    }
   } catch (_) {}
   // 브라우저 개발 환경 폴백
   return new Promise((resolve, reject) => {
@@ -142,7 +144,7 @@ async function requestLocation() {
     navigator.geolocation.getCurrentPosition(
       pos => resolve(pos.coords),
       err => reject(err),
-      { timeout: 6000 }
+      { timeout: 10000, enableHighAccuracy: false, maximumAge: 60000 }
     );
   });
 }
@@ -187,9 +189,13 @@ async function selectSkyTab(mode) {
   if (locationConsent === null) {
     const agreed = await showLocConsentModal();
     if (agreed) {
+      const tabBtn = $('tabLocal');
+      tabBtn.textContent = '위치 확인 중…';
+      tabBtn.disabled = true;
       try {
         const coords = await requestLocation();
-        locationConsent = true; // 좌표 취득 성공 → 동의 확정 (region 조회 실패와 무관)
+        locationConsent = true;
+        localStorage.setItem('locationConsented', '1');
         try {
           const data = await apiFetch(`/api/nearest-region?lat=${coords.latitude}&lon=${coords.longitude}`);
           myRegion = data.city?.nameKo || null;
@@ -200,9 +206,13 @@ async function selectSkyTab(mode) {
         } catch (_) { myRegion = null; }
       } catch (_) {
         locationConsent = false;
+        localStorage.setItem('locationConsented', '0');
+      } finally {
+        tabBtn.disabled = false;
       }
     } else {
       locationConsent = false;
+      localStorage.setItem('locationConsented', '0');
     }
   }
   skyMode = 'local';
@@ -804,8 +814,10 @@ async function init() {
   updateNavHighlight();
   spawnLoop(); spawnLoop(); spawnLoop();
 
-  // 조용히 위치 취득 — 성공하면 방울 제출 시 region 첨부됨
-  fetchRegionSilent();
+  // 이전 세션 동의 복원 — 동의했던 경우만 조용히 위치 재취득
+  const _storedConsent = localStorage.getItem('locationConsented');
+  if (_storedConsent === '1') { locationConsent = true; fetchRegionSilent(); }
+  else if (_storedConsent === '0') { locationConsent = false; }
 
   loadSky().then(() => {
     renderMoodSummaryFromPool();

@@ -427,8 +427,10 @@
     border:none;background:transparent;color:var(--bg-gray-300);
     font-family:var(--font);font-size:var(--font-size-caption-sm);font-weight:700;white-space:nowrap;
     padding:8px 12px;border-radius:var(--radius-pill);cursor:pointer;
+    transition:opacity .2s;
   }
   .app-nav button.on{background:linear-gradient(135deg,var(--mint-500),var(--mint-700));color:var(--white)}
+  .app-nav button:disabled{opacity:.45;cursor:default;}
 
   /* ── 위치 동의 모달 (.phone 직하, z-index 70) ── */
   .loc-modal-wrap{
