@@ -334,7 +334,7 @@ function showPop(b, el) {
   $('popNick').textContent = b.nick || '';
   $('popSrc').style.display = b.src === 'rank' ? '' : 'none';
   $('popTime').textContent = b.time || relTime(b.createdAt) || '';
-  $('popText').textContent = b.text || '(말 없이 띄운 방울이에요)';
+  $('popText').textContent = b.text || '말 없이, 그냥 날려봤어요 🫧';
   $('likeCnt').textContent = b.likes || 0;
   $('likeBtn').classList.remove('liked');
   $('popCard').classList.add('show');
@@ -676,11 +676,11 @@ async function loadMe() {
     const bubbles = data.bubbles || [];
     myBubbleIds = new Set(bubbles.map(b => b.id));
     $('myList').innerHTML = bubbles.length === 0
-      ? '<div style="color:var(--ink-300);font-size:var(--font-size-caption);font-weight:600;margin-top:16px">아직 날린 방울이 없어요</div>'
+      ? '<div style="color:var(--ink-300);font-size:var(--font-size-caption);font-weight:600;margin-top:16px;line-height:1.7">아직 날린 방울이 없어요 🫧<br>첫 방울을 하늘로 띄워보세요</div>'
       : bubbles.map(b => `
         <div class="my-bubble-row ${b.expired ? 'gone' : ''}" data-id="${b.id}">
           <span class="bd" style="background:${moodOf(b.mood).color}"></span>
-          <p>${b.text || '(빈 방울)'}</p>
+          <p>${b.text || '말 없이 날린 방울'}</p>
           <span class="meta">${relTime(b.createdAt)} · 공감 ${b.likes}</span>
         </div>`).join('');
 
