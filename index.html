@@ -530,6 +530,32 @@
     color:var(--ink-300);cursor:pointer;
   }
 
+  /* ── E: pop-card 위치 토글 ── */
+  .pop-card.top-anchor{bottom:auto;top:calc(var(--toss-safe-top) + 80px)}
+
+  /* ── D: 첫 방문 코치마크 ── */
+  .coach-wrap{
+    position:absolute;inset:0;z-index:80;
+    display:flex;flex-direction:column;justify-content:space-between;align-items:center;
+    padding:calc(var(--toss-safe-top) + 100px) 24px calc(var(--toss-safe-bottom) + 185px);
+    background:rgba(25,31,40,.66);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);
+    opacity:0;pointer-events:none;transition:opacity .32s ease;
+  }
+  .coach-wrap.show{opacity:1;pointer-events:auto}
+  .coach-tip{display:flex;flex-direction:column;align-items:center;gap:10px}
+  .coach-text{
+    background:rgba(255,255,255,.97);border-radius:var(--radius-lg);
+    padding:11px 18px;font-size:var(--font-size-caption);font-weight:700;
+    color:var(--ink-900);text-align:center;line-height:1.65;
+    box-shadow:0 4px 20px rgba(0,0,0,.18);
+  }
+  .coach-arr{font-size:22px;color:rgba(255,255,255,.85);line-height:1}
+  .coach-dismiss{
+    position:absolute;bottom:calc(var(--toss-safe-bottom) + 110px);
+    font-size:var(--font-size-caption-sm);font-weight:700;
+    color:rgba(255,255,255,.6);letter-spacing:.4px;
+  }
+
   /* ── 스카이 토스트 (alert 대체, 비차단) ── */
   .sky-toast{
     position:absolute;bottom:calc(var(--toss-safe-bottom) + 152px);left:50%;
@@ -636,7 +662,7 @@
           </div>
           <div class="filter-warn" id="filterWarn">이 표현은 방울에 담을 수 없어요</div>
           <button class="tmui-primary-btn sheet-submit" id="submitBtn">후— 하늘로 띄우기</button>
-          <div class="cooldown-note">🕐 마음 방울은 10분에 1개 · 후— 불기는 무제한이에요</div>
+          <div class="cooldown-note" id="cooldownNote">🕐 마음 방울은 10분에 1개 · 후— 불기는 무제한이에요</div>
         </div>
       </div>
     </section>
@@ -680,6 +706,19 @@
     <button id="tabLocal">우리 동네 하늘</button>
     <button id="tabMe">내 방울함</button>
   </nav>
+
+  <!-- ====== D: 첫 방문 코치마크 (z-index 80) ====== -->
+  <div class="coach-wrap" id="coachWrap">
+    <div class="coach-tip">
+      <div class="coach-text">떠다니는 방울을 탭하면<br>다른 사람 마음을 읽어요 👆</div>
+      <div class="coach-arr">↕</div>
+    </div>
+    <div class="coach-tip">
+      <div class="coach-arr">↓</div>
+      <div class="coach-text">화면을 꾹 눌러<br>내 방울을 날려요 🫧</div>
+    </div>
+    <div class="coach-dismiss">화면을 탭하면 시작해요</div>
+  </div>
 
   <!-- ====== 신고 모달 (phone 직하, z-index 75) ====== -->
   <div class="report-wrap" id="reportWrap">

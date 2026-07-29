@@ -337,6 +337,10 @@ function showPop(b, el) {
   $('popText').textContent = b.text || '말 없이, 그냥 날려봤어요 🫧';
   $('likeCnt').textContent = b.likes || 0;
   $('likeBtn').classList.remove('liked');
+  // E: 방울 위치 기반 카드 위치 토글
+  const phone = document.querySelector('.phone');
+  const relY = (el.getBoundingClientRect().top - phone.getBoundingClientRect().top) / phone.getBoundingClientRect().height;
+  $('popCard').classList.toggle('top-anchor', relY >= 0.45);
   $('popCard').classList.add('show');
   updateNavVisibility();
   trackClick({ log_name: 'bubble_open', mood: b.mood });
@@ -581,8 +585,33 @@ $('moodGrid').addEventListener('click', e => {
   }
 });
 
-function openSheet() { hidePop(); $('sheetOverlay').classList.add('show'); updateNavVisibility(); }
-function closeSheet() { $('sheetOverlay').classList.remove('show'); updateNavVisibility(); }
+// F: 쿨다운 카운트다운
+let _cdTimer = null;
+function _updateCooldownNote() {
+  const until = parseInt(localStorage.getItem('bubbleCooldownUntil') || '0');
+  const rem = until - Date.now();
+  const note = $('cooldownNote');
+  const btn = $('submitBtn');
+  if (rem > 0) {
+    const m = Math.floor(rem / 60000);
+    const s = Math.ceil((rem % 60000) / 1000);
+    note.textContent = `🕐 ${m}분 ${s}초 후 다시 날릴 수 있어요`;
+    btn.disabled = true;
+  } else {
+    note.textContent = '🕐 마음 방울은 10분에 1개 · 후— 불기는 무제한이에요';
+    btn.disabled = false;
+    clearInterval(_cdTimer);
+  }
+}
+function startCooldownTicker() {
+  clearInterval(_cdTimer);
+  _updateCooldownNote();
+  _cdTimer = setInterval(_updateCooldownNote, 1000);
+}
+function stopCooldownTicker() { clearInterval(_cdTimer); }
+
+function openSheet() { hidePop(); $('sheetOverlay').classList.add('show'); updateNavVisibility(); startCooldownTicker(); }
+function closeSheet() { $('sheetOverlay').classList.remove('show'); updateNavVisibility(); stopCooldownTicker(); }
 $('sheetOverlay').addEventListener('click', e => { if (e.target === $('sheetOverlay')) closeSheet(); });
 $('btnComment').addEventListener('click', () => { openSheet(); trackClick({ log_name: 'sheet_open' }); });
 
@@ -630,6 +659,8 @@ async function submitBubble() {
     trackClick({ log_name: 'bubble_submit', mood: selMood, has_text: !!text });
   } catch (err) {
     if (err.status === 429) {
+      const secs = err.data?.retryAfterSec || 600;
+      localStorage.setItem('bubbleCooldownUntil', Date.now() + secs * 1000);
       showSkyToast(err.data?.error || '마음 방울은 10분에 1개예요 🕐');
     }
   }
@@ -758,9 +789,21 @@ async function init() {
   loadSky().then(() => {
     renderMoodSummaryFromPool();
     spawnIdx = 0;
+    initCoachMark();
   });
   loadMoodSummary();
   trackScreen({ log_name: 'sky_home', sky_mode: skyMode });
+}
+
+// D: 첫 방문 코치마크
+function initCoachMark() {
+  if (localStorage.getItem('bubbleVisited')) return;
+  const wrap = $('coachWrap');
+  wrap.classList.add('show');
+  wrap.addEventListener('click', () => {
+    wrap.classList.remove('show');
+    localStorage.setItem('bubbleVisited', '1');
+  }, { once: true });
 }
 
 init();
