@@ -355,7 +355,7 @@ $('s1').addEventListener('click', e => {
   if (!e.target.closest('.pop-card') && !e.target.closest('.fly-bubble')) hidePop();
 });
 $('likeBtn').addEventListener('click', toggleLike);
-$('reportBtn').addEventListener('click', reportBubble);
+$('reportBtn').addEventListener('click', openReportModal);
 
 async function toggleLike() {
   if (!currentBubble) return;
@@ -369,13 +369,36 @@ async function toggleLike() {
   trackClick({ log_name: 'bubble_like', mood: currentBubble?.mood });
 }
 
-async function reportBubble() {
+// ── 신고 모달 (prompt() 대체) ────────────────────────────────────
+let selectedReason = null;
+
+function openReportModal() {
   if (!currentBubble || !currentBubble.id || currentBubble.id.startsWith('m')) return;
-  const reason = prompt('신고 사유를 선택해주세요:\n1. 비방/욕설\n2. 광고\n3. 개인정보\n4. 기타');
-  if (!reason) return;
-  await apiFetch('/api/report', { method: 'POST', body: JSON.stringify({ id: currentBubble.id, reason }) }).catch(() => {});
-  hidePop();
+  selectedReason = null;
+  $('reasonList').querySelectorAll('.reason-btn').forEach(b => b.classList.remove('on'));
+  $('reportSubmitBtn').disabled = true;
+  $('reportWrap').classList.add('show');
 }
+function closeReportModal() {
+  $('reportWrap').classList.remove('show');
+}
+
+$('reasonList').addEventListener('click', e => {
+  const btn = e.target.closest('.reason-btn');
+  if (!btn) return;
+  $('reasonList').querySelectorAll('.reason-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  selectedReason = btn.dataset.reason;
+  $('reportSubmitBtn').disabled = false;
+});
+$('reportSubmitBtn').addEventListener('click', async () => {
+  if (!selectedReason || !currentBubble) return;
+  closeReportModal();
+  await apiFetch('/api/report', { method: 'POST', body: JSON.stringify({ id: currentBubble.id, reason: selectedReason }) }).catch(() => {});
+  hidePop();
+  trackClick({ log_name: 'bubble_report', reason: selectedReason });
+});
+$('reportCancelBtn').addEventListener('click', closeReportModal);
 
 // ── 비눗방울 불기 (F2-a) ─────────────────────────────────────────
 const activeBlows = new Map();
@@ -607,9 +630,17 @@ async function submitBubble() {
     trackClick({ log_name: 'bubble_submit', mood: selMood, has_text: !!text });
   } catch (err) {
     if (err.status === 429) {
-      alert(err.data?.error || '마음 방울은 10분에 1개예요');
+      showSkyToast(err.data?.error || '마음 방울은 10분에 1개예요 🕐');
     }
   }
+}
+
+function showSkyToast(msg) {
+  const el = $('skyToast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 3200);
 }
 
 // ── 내 방울함 (화면 2) ───────────────────────────────────────────

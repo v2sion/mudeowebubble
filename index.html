@@ -478,6 +478,58 @@
     animation:pulseWand 2.4s ease-in-out infinite;
     transform-origin:center bottom;
   }
+
+  /* ── 신고 모달 ── */
+  .report-wrap{
+    position:absolute;inset:0;z-index:75;
+    background:rgba(25,31,40,.42);
+    display:none;align-items:flex-end;
+  }
+  .report-wrap.show{display:flex}
+  .report-sheet{
+    width:100%;
+    background:rgba(255,255,255,.97);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+    border-radius:24px 24px 0 0;
+    padding:0 20px calc(var(--toss-safe-bottom) + 24px);
+    animation:sheetSpring .42s cubic-bezier(.34,1.4,.64,1);
+  }
+  .report-sheet::before{
+    content:'';display:block;width:40px;height:4px;
+    background:var(--ink-100);border-radius:2px;
+    margin:16px auto 20px;
+  }
+  .report-sheet-title{font-size:var(--font-size-section-title);font-weight:800;margin-bottom:14px;color:var(--ink-900)}
+  .reason-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+  .reason-btn{
+    width:100%;border:1.5px solid var(--ink-100);border-radius:var(--radius-md);
+    background:var(--white);padding:12px 16px;text-align:left;cursor:pointer;
+    font-family:var(--font);font-size:var(--font-size-body);font-weight:700;color:var(--ink-700);
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .reason-btn.on{border-color:var(--toss-red);background:var(--toss-red-light);color:var(--toss-red)}
+  .report-submit-btn{
+    width:100%;
+    background:linear-gradient(135deg,var(--toss-red),#C82A36);
+    box-shadow:0 8px 20px color-mix(in oklch, var(--toss-red) 28%, transparent);
+  }
+  .report-submit-btn:disabled{opacity:.42;box-shadow:none}
+  .report-cancel-btn{
+    width:100%;padding:14px;border:none;background:transparent;margin-top:4px;
+    font-family:var(--font);font-size:var(--font-size-body);font-weight:700;
+    color:var(--ink-300);cursor:pointer;
+  }
+
+  /* ── 스카이 토스트 (alert 대체, 비차단) ── */
+  .sky-toast{
+    position:absolute;bottom:calc(var(--toss-safe-bottom) + 152px);left:50%;
+    transform:translateX(-50%) translateY(10px);
+    background:rgba(25,31,40,.88);backdrop-filter:blur(10px);
+    color:var(--white);font-size:var(--font-size-caption);font-weight:700;
+    padding:10px 20px;border-radius:var(--radius-pill);z-index:25;
+    white-space:nowrap;opacity:0;pointer-events:none;
+    transition:opacity .22s ease, transform .22s ease;
+  }
+  .sky-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
@@ -554,6 +606,8 @@
         </p>
       </div>
 
+      <div class="sky-toast" id="skyToast"></div>
+
       <div class="action-bar">
         <button class="tmui-primary-btn btn-comment" id="btnComment">💬 비눗방울에 내 마음 담기</button>
       </div>
@@ -614,6 +668,21 @@
     <button id="tabLocal">우리 동네 하늘</button>
     <button id="tabMe">내 방울함</button>
   </nav>
+
+  <!-- ====== 신고 모달 (phone 직하, z-index 75) ====== -->
+  <div class="report-wrap" id="reportWrap">
+    <div class="report-sheet">
+      <p class="report-sheet-title">신고 사유를 선택해주세요</p>
+      <div class="reason-list" id="reasonList">
+        <button class="reason-btn" data-reason="비방/욕설">비방/욕설</button>
+        <button class="reason-btn" data-reason="광고/스팸">광고/스팸</button>
+        <button class="reason-btn" data-reason="개인정보 노출">개인정보 노출</button>
+        <button class="reason-btn" data-reason="기타">기타</button>
+      </div>
+      <button class="tmui-primary-btn report-submit-btn" id="reportSubmitBtn" disabled>신고하기</button>
+      <button class="report-cancel-btn" id="reportCancelBtn">취소</button>
+    </div>
+  </div>
 
   <!-- ====== 위치 정보 이용 동의 (phone 직하, z-index 70) ====== -->
   <div class="loc-modal-wrap" id="locConsentOverlay">
