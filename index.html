@@ -87,7 +87,7 @@
   }
   .sky-top{
     position:absolute;top:0;left:0;right:0;z-index:5;
-    padding:24px 20px 24px;
+    padding:calc(24px + var(--toss-safe-top)) 20px 24px;
     background:linear-gradient(180deg, rgba(255,255,255,.8), transparent);
   }
   .sky-dark .sky-top{background:linear-gradient(180deg, rgba(25,31,40,.55), transparent)}
@@ -366,7 +366,7 @@
   .cooldown-note{margin-top:12px;font-size:var(--font-size-caption-sm);color:var(--ink-300);font-weight:700;line-height:1.6}
 
   /* ── 화면 2: 내 방울함 ── */
-  #s2{padding:20px 18px 96px;background:linear-gradient(180deg,var(--mint-050),var(--white) 34%)}
+  #s2{padding:20px 18px calc(96px + var(--toss-safe-bottom));background:linear-gradient(180deg,var(--mint-050),var(--white) 34%)}
   .me-hero{
     background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-card);
     padding:16px;display:flex;justify-content:space-between;align-items:center;
@@ -403,7 +403,7 @@
 
   /* ── 하단 내비 ── */
   .app-nav{
-    position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:50;
+    position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + var(--toss-safe-bottom));z-index:50;
     display:flex;gap:4px;
     background:color-mix(in oklch, var(--ink-900) 58%, transparent);
     backdrop-filter:blur(10px);
