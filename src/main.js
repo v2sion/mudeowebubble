@@ -127,7 +127,8 @@ async function goToSky(mode) {
 
 // ── 위치 & 하늘 탭 ───────────────────────────────────────────────
 let locationConsent = null;
-let myRegion = null;
+let myRegion = null;        // 구 단위 (필터·저장용, e.g. "마포구")
+let myRegionDisplay = null; // 표시용 (e.g. "서울 마포구")
 
 async function requestLocation() {
   // 토스 앱 환경: SDK 브릿지 우선 사용
@@ -162,25 +163,33 @@ function showLocConsentModal() {
   });
 }
 
+// 위치 정보를 조용히 취득해서 myRegion/myRegionDisplay 세팅 (모달 없음)
+async function fetchRegionSilent() {
+  try {
+    const coords = await requestLocation();
+    const data = await apiFetch(`/api/nearest-region?lat=${coords.latitude}&lon=${coords.longitude}`);
+    myRegion = data.city?.nameKo || null;
+    if (myRegion) {
+      const sidoShort = (data.city?.sido || '').replace(/(특별시|광역시|특별자치시|특별자치도|도)$/, '');
+      myRegionDisplay = sidoShort ? `${sidoShort} ${myRegion}` : myRegion;
+    }
+  } catch (_) {}
+}
+
 async function selectSkyTab(mode) {
   if (mode === 'all') {
     skyMode = 'all';
     updateSkyTabsUI();
     renderSkyFilterCap();
+    await loadSky();
     return;
   }
   if (locationConsent === null) {
     const agreed = await showLocConsentModal();
     if (agreed) {
       try {
-        const coords = await requestLocation();
-        locationConsent = true;
-        try {
-          const data = await apiFetch(`/api/nearest-region?lat=${coords.latitude}&lon=${coords.longitude}`);
-          myRegion = data.city?.nameKo || null;
-        } catch (_) {
-          myRegion = null;
-        }
+        await fetchRegionSilent();
+        locationConsent = myRegion ? true : false;
       } catch (_) {
         locationConsent = false;
       }
@@ -202,7 +211,7 @@ function updateSkyTabsUI() {
 function renderSkyFilterCap() {
   if (skyMode !== 'local') { $('skyFilterCap').textContent = ''; return; }
   if (locationConsent === true && myRegion) {
-    $('skyFilterCap').textContent = `지금 보고 있는 하늘: ${myRegion}`;
+    $('skyFilterCap').textContent = `지금 보고 있는 하늘: ${myRegionDisplay || myRegion}`;
   } else {
     $('skyFilterCap').textContent = '지금 보고 있는 하늘: 방울이 가장 많이 모인 곳';
   }
@@ -635,7 +644,7 @@ async function submitBubble() {
     id: 'local_' + Date.now(),
     mood: selMood, nick: myNick || '내 방울',
     text, time: '방금', likes: 0, mine: true,
-    region: locationConsent === true ? myRegion : '',
+    region: myRegion || '',
     createdAt: Date.now(),
   };
   skyPool.unshift(localBubble);
@@ -785,6 +794,9 @@ async function init() {
   renderMoodGrid();
   updateNavHighlight();
   spawnLoop(); spawnLoop(); spawnLoop();
+
+  // 조용히 위치 취득 — 성공하면 방울 제출 시 region 첨부됨
+  fetchRegionSilent();
 
   loadSky().then(() => {
     renderMoodSummaryFromPool();

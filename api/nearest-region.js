@@ -45,6 +45,7 @@ export default async function handler(req, res) {
     city: {
       code: cityResult.item.code,
       nameKo: cityResult.item.nameKo,
+      sido: cityResult.item.sido || '',
       lat: cityResult.item.lat,
       lon: cityResult.item.lon,
       distanceKm: Math.round(cityResult.distanceKm * 10) / 10,
