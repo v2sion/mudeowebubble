@@ -53,13 +53,13 @@ function initSafeArea() {
 
 // ── 기분 팔레트 ─────────────────────────────────────────────────
 const MOODS = [
-  { key: 'joy',     label: '기쁨',   emoji: '😊', color: 'var(--toss-yellow)',    tip: '다들 기분 좋은 하루를 보내고 있나 봐요' },
-  { key: 'flutter', label: '설렘',   emoji: '🥰', color: '#F06292',              tip: '설레는 방울이 유독 많은 하늘이에요' },
-  { key: 'calm',    label: '평온',   emoji: '😌', color: 'var(--mint-400)',        tip: '평온한 방울이 하늘을 채우고 있어요' },
-  { key: 'tired',   label: '피곤',   emoji: '😮‍💨', color: 'var(--bg-gray-300)',   tip: '다들 지친 하루를 보내고 있나 봐요' },
-  { key: 'blue',    label: '우울',   emoji: '😔', color: 'var(--toss-blue)',       tip: '조금 가라앉은 방울이 많은 하늘이에요' },
-  { key: 'angry',   label: '화남',   emoji: '😤', color: 'var(--toss-red)',        tip: '오늘따라 화가 난 방울이 많네요' },
-  { key: 'heat',    label: '더위먹음', emoji: '🥵', color: 'var(--heat-veryhot)', tip: '다들 더위에 지쳐있어요' },
+  { key: 'joy',     label: '기쁨',    emoji: '😊',  color: 'var(--mood-joy)',     tip: '다들 기분 좋은 하루를 보내고 있나 봐요' },
+  { key: 'flutter', label: '설렘',    emoji: '🥰',  color: 'var(--mood-flutter)', tip: '설레는 방울이 유독 많은 하늘이에요' },
+  { key: 'calm',    label: '평온',    emoji: '😌',  color: 'var(--mood-calm)',    tip: '평온한 방울이 하늘을 채우고 있어요' },
+  { key: 'tired',   label: '피곤',    emoji: '😮‍💨', color: 'var(--mood-tired)',   tip: '다들 지친 하루를 보내고 있나 봐요' },
+  { key: 'blue',    label: '우울',    emoji: '😔',  color: 'var(--mood-blue)',    tip: '조금 가라앉은 방울이 많은 하늘이에요' },
+  { key: 'angry',   label: '화남',    emoji: '😤',  color: 'var(--mood-angry)',   tip: '오늘따라 화가 난 방울이 많네요' },
+  { key: 'heat',    label: '더위먹음', emoji: '🥵',  color: 'var(--mood-heat)',    tip: '다들 더위에 지쳐있어요' },
 ];
 const moodOf = k => MOODS.find(m => m.key === k) || MOODS[0];
 
