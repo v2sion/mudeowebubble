@@ -195,13 +195,16 @@ async function selectSkyTab(mode) {
     tabBtn.textContent = '위치 확인 중…';
     tabBtn.disabled = true;
     try {
-      const permStatus = await getCurrentLocation.getPermission().catch(() => 'notDetermined');
-      if (permStatus !== 'allowed') {
-        // notDetermined(최초) / denied(재요청) 모두 openPermissionDialog로 처리 → 다이얼로그 1개
-        const result = await getCurrentLocation.openPermissionDialog().catch(() => 'denied');
-        if (result === 'denied') throw new Error('denied');
+      // 형제앱(무더위 체감 랭킹) 동일 패턴:
+      // getCurrentLocation()이 내부적으로 권한 다이얼로그를 처리한다.
+      // getPermission/openPermissionDialog는 SDK 버전에 따라 없을 수 있으므로
+      // 존재 여부를 확인하고, 실패해도 requestLocation() 호출은 항상 진행한다.
+      if (typeof getCurrentLocation.getPermission === 'function') {
+        const perm = await getCurrentLocation.getPermission().catch(() => null);
+        if (perm === 'denied' && typeof getCurrentLocation.openPermissionDialog === 'function') {
+          await getCurrentLocation.openPermissionDialog().catch(() => {});
+        }
       }
-      // 이 시점 permission = 'allowed' 확정 → getCurrentLocation() 내부 다이얼로그 미표시
       const coords = await requestLocation();
       locationConsent = true;
       localStorage.setItem('locationConsented', '1');
