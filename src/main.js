@@ -5,6 +5,7 @@ import {
   closeView,
   openURL,
   saveBase64Data,
+  Accuracy,
   getCurrentLocation,
 } from '@apps-in-toss/web-framework';
 import html2canvas from 'html2canvas-pro';
@@ -131,11 +132,11 @@ let myRegion = null;        // 구 단위 (필터·저장용, e.g. "마포구")
 let myRegionDisplay = null; // 표시용 (e.g. "서울 마포구")
 
 async function requestLocation() {
-  // COARSE = 네트워크 기반, 구 단위 정밀도로 충분하고 GPS보다 빠름
+  // Balanced = 네트워크 기반, 구 단위 정밀도로 충분하고 GPS보다 빠름
   try {
-    const loc = await withTimeout(getCurrentLocation({ accuracy: 'COARSE' }), 10000);
-    if (loc?.latitude != null && loc?.longitude != null) {
-      return { latitude: loc.latitude, longitude: loc.longitude };
+    const loc = await withTimeout(getCurrentLocation({ accuracy: Accuracy.Balanced }), 10000);
+    if (loc?.coords?.latitude != null && loc?.coords?.longitude != null) {
+      return { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
     }
   } catch (_) {}
   // 브라우저 개발 환경 폴백
