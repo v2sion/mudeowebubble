@@ -243,7 +243,7 @@ function renderSkyFilterCap() {
       ? `지금 보고 있는 하늘: ${topRegion} (지금 제일 핫한 동네)`
       : '지금 보고 있는 하늘: 방울이 가장 많이 모인 곳';
     // 거부한 경우에만 재동의 버튼 표시
-    if (reconsentBtn) reconsentBtn.style.display = locationConsent === false ? '' : 'none';
+    if (reconsentBtn) reconsentBtn.style.display = locationConsent === false ? 'block' : 'none';
   }
 }
 
@@ -855,7 +855,7 @@ async function init() {
 
 // D: 첫 방문 코치마크
 function initCoachMark() {
-  if (localStorage.getItem('bubbleVisited')) return;
+  if (localStorage.getItem('bubbleNoShow')) return;
   const wrap = $('coachWrap');
   wrap.classList.add('show');
   function onDismiss(e) {
@@ -863,7 +863,7 @@ function initCoachMark() {
     wrap.classList.remove('show');
     wrap.removeEventListener('click', onDismiss);
     if (document.getElementById('coachNoShow')?.checked) {
-      localStorage.setItem('bubbleVisited', '1');
+      localStorage.setItem('bubbleNoShow', '1');
     }
     // 체크 안 했으면 저장하지 않음 → 다음 방문 시 다시 표시
   }
