@@ -554,8 +554,19 @@
   .coach-arr{font-size:22px;color:rgba(255,255,255,.85);line-height:1}
   .coach-dismiss{
     position:absolute;bottom:calc(var(--toss-safe-bottom) + 110px);
+    display:flex;flex-direction:column;align-items:center;gap:10px;
     font-size:var(--font-size-caption-sm);font-weight:700;
     color:rgba(255,255,255,.6);letter-spacing:.4px;
+  }
+  .coach-noshowagain{
+    display:flex;align-items:center;gap:6px;
+    color:rgba(255,255,255,.78);font-weight:500;letter-spacing:0;cursor:pointer;
+  }
+  .coach-noshowagain input{width:16px;height:16px;accent-color:var(--mint-500);cursor:pointer;}
+  .sky-reconsent-btn{
+    display:none;border:none;background:none;padding:2px 0;
+    color:var(--mint-500);font-size:var(--font-size-caption-sm);font-weight:600;
+    cursor:pointer;text-decoration:underline;text-underline-offset:2px;
   }
 
   /* ── 스카이 토스트 (alert 대체, 비차단) ── */
@@ -582,6 +593,7 @@
       <div class="sky-top">
         <div class="app-title">무더위 버블 타임 🫧</div>
         <div class="sky-filter-cap" id="skyFilterCap"></div>
+        <button class="sky-reconsent-btn" id="skyReconsentBtn">내 위치로 보기</button>
         <div class="date-cap" id="skyCap">방울은 하늘로 날아가 사라져요</div>
         <div class="mood-summary" id="moodSummary">
           <span class="dot" id="moodSummaryDot"></span><span class="mood-summary-text">지금 하늘엔 <b id="moodSummaryLabel"></b>이 <span id="moodSummaryPct"></span>% — <span id="moodSummaryTip"></span></span>
@@ -719,7 +731,10 @@
       <div class="coach-arr">↓</div>
       <div class="coach-text">화면을 꾹 눌러<br>내 방울을 날려요 🫧</div>
     </div>
-    <div class="coach-dismiss">화면을 탭하면 시작해요</div>
+    <div class="coach-dismiss">
+      <label class="coach-noshowagain"><input type="checkbox" id="coachNoShow"> 다시 보지 않기</label>
+      <div>화면을 탭하면 시작해요</div>
+    </div>
   </div>
 
   <!-- ====== 신고 모달 (phone 직하, z-index 75) ====== -->

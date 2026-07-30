@@ -228,11 +228,22 @@ function updateSkyTabsUI() {
 }
 
 function renderSkyFilterCap() {
-  if (skyMode !== 'local') { $('skyFilterCap').textContent = ''; return; }
+  const reconsentBtn = $('skyReconsentBtn');
+  if (skyMode !== 'local') {
+    $('skyFilterCap').textContent = '';
+    if (reconsentBtn) reconsentBtn.style.display = 'none';
+    return;
+  }
   if (locationConsent === true && myRegion) {
     $('skyFilterCap').textContent = `지금 보고 있는 하늘: ${myRegionDisplay || myRegion}`;
+    if (reconsentBtn) reconsentBtn.style.display = 'none';
   } else {
-    $('skyFilterCap').textContent = '지금 보고 있는 하늘: 방울이 가장 많이 모인 곳';
+    const topRegion = findHottestRegion(skyPool);
+    $('skyFilterCap').textContent = topRegion
+      ? `지금 보고 있는 하늘: ${topRegion} (지금 제일 핫한 동네)`
+      : '지금 보고 있는 하늘: 방울이 가장 많이 모인 곳';
+    // 거부한 경우에만 재동의 버튼 표시
+    if (reconsentBtn) reconsentBtn.style.display = locationConsent === false ? '' : 'none';
   }
 }
 
@@ -256,6 +267,7 @@ async function loadSky() {
   } catch (_) {
     // MOCK 폴백 유지
   }
+  renderSkyFilterCap(); // skyPool 업데이트 후 실제 핫 지역명 반영
 }
 
 async function loadMoodSummary() {
@@ -306,6 +318,14 @@ function sizeFromText(text) {
   return Math.round(Math.min(46 + text.length * 3.2, 108));
 }
 
+function findHottestRegion(pool) {
+  const counts = {};
+  pool.forEach(p => { if (p.region) counts[p.region] = (counts[p.region] || 0) + 1; });
+  let best = null, bestN = 0;
+  Object.entries(counts).forEach(([r, n]) => { if (n > bestN) { best = r; bestN = n; } });
+  return best;
+}
+
 function getActivePool() {
   if (skyMode !== 'local') return skyPool;
   if (locationConsent === true && myRegion) {
@@ -313,11 +333,8 @@ function getActivePool() {
     const filtered = skyPool.filter(p => !p.region || p.region === myRegion);
     return filtered.length ? filtered : skyPool;
   }
-  // 거부 시: 방울 수 가장 많은 지역
-  const counts = {};
-  skyPool.forEach(p => { if (p.region) counts[p.region] = (counts[p.region] || 0) + 1; });
-  let topRegion = null, topN = 0;
-  Object.entries(counts).forEach(([r, n]) => { if (n > topN) { topRegion = r; topN = n; } });
+  // 거부/폴백: 버블이 가장 많은 지역만 표시 (모두의 하늘과 차별화)
+  const topRegion = findHottestRegion(skyPool);
   if (!topRegion) return skyPool;
   const filtered = skyPool.filter(p => p.region === topRegion);
   return filtered.length ? filtered : skyPool;
@@ -800,6 +817,13 @@ $('tabAll').addEventListener('click',  () => goToSky('all'));
 $('tabLocal').addEventListener('click', () => goToSky('local'));
 $('tabMe').addEventListener('click',   () => goToScreen(1));
 
+// 위치 거부 후 재동의 버튼
+$('skyReconsentBtn')?.addEventListener('click', () => {
+  locationConsent = null;
+  localStorage.removeItem('locationConsented');
+  goToSky('local');
+});
+
 // ── 초기화 ──────────────────────────────────────────────────────
 async function init() {
   initSafeArea();
@@ -834,10 +858,16 @@ function initCoachMark() {
   if (localStorage.getItem('bubbleVisited')) return;
   const wrap = $('coachWrap');
   wrap.classList.add('show');
-  wrap.addEventListener('click', () => {
+  function onDismiss(e) {
+    if (e.target.tagName === 'INPUT') return; // 체크박스 토글은 dismiss 아님
     wrap.classList.remove('show');
-    localStorage.setItem('bubbleVisited', '1');
-  }, { once: true });
+    wrap.removeEventListener('click', onDismiss);
+    if (document.getElementById('coachNoShow')?.checked) {
+      localStorage.setItem('bubbleVisited', '1');
+    }
+    // 체크 안 했으면 저장하지 않음 → 다음 방문 시 다시 표시
+  }
+  wrap.addEventListener('click', onDismiss);
 }
 
 init();
