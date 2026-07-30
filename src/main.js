@@ -188,32 +188,34 @@ async function selectSkyTab(mode) {
     return;
   }
   if (locationConsent === null) {
-    const agreed = await showLocConsentModal();
-    if (agreed) {
-      const tabBtn = $('tabLocal');
-      tabBtn.textContent = '위치 확인 중…';
-      tabBtn.disabled = true;
-      try {
-        const coords = await requestLocation();
-        locationConsent = true;
-        localStorage.setItem('locationConsented', '1');
-        try {
-          const data = await apiFetch(`/api/nearest-region?lat=${coords.latitude}&lon=${coords.longitude}`);
-          myRegion = data.city?.nameKo || null;
-          if (myRegion && data.city?.sido) {
-            const sidoShort = data.city.sido.replace(/(특별시|광역시|특별자치시|특별자치도|도)$/, '');
-            myRegionDisplay = sidoShort ? `${sidoShort} ${myRegion}` : myRegion;
-          }
-        } catch (_) { myRegion = null; }
-      } catch (_) {
-        locationConsent = false;
-        localStorage.setItem('locationConsented', '0');
-      } finally {
-        tabBtn.disabled = false;
+    const tabBtn = $('tabLocal');
+    tabBtn.textContent = '위치 확인 중…';
+    tabBtn.disabled = true;
+    try {
+      // notDetermined → getCurrentLocation() 내부에서 SDK 다이얼로그 1개 표시
+      // denied → openPermissionDialog()로 재허용 요청 (다이얼로그 1개)
+      // allowed → 다이얼로그 없이 바로 취득
+      const permStatus = await getCurrentLocation.getPermission().catch(() => 'notDetermined');
+      if (permStatus === 'denied') {
+        const newPerm = await getCurrentLocation.openPermissionDialog().catch(() => 'denied');
+        if (newPerm === 'denied') throw new Error('denied');
       }
-    } else {
+      const coords = await requestLocation();
+      locationConsent = true;
+      localStorage.setItem('locationConsented', '1');
+      try {
+        const data = await apiFetch(`/api/nearest-region?lat=${coords.latitude}&lon=${coords.longitude}`);
+        myRegion = data.city?.nameKo || null;
+        if (myRegion && data.city?.sido) {
+          const sidoShort = data.city.sido.replace(/(특별시|광역시|특별자치시|특별자치도|도)$/, '');
+          myRegionDisplay = sidoShort ? `${sidoShort} ${myRegion}` : myRegion;
+        }
+      } catch (_) { myRegion = null; }
+    } catch (_) {
       locationConsent = false;
       localStorage.setItem('locationConsented', '0');
+    } finally {
+      tabBtn.disabled = false;
     }
   }
   skyMode = 'local';
@@ -237,6 +239,10 @@ function renderSkyFilterCap() {
   if (locationConsent === true && myRegion) {
     $('skyFilterCap').textContent = `지금 보고 있는 하늘: ${myRegionDisplay || myRegion}`;
     if (reconsentBtn) reconsentBtn.style.display = 'none';
+  } else if (locationConsent === true && !myRegion) {
+    // 위치 허용했지만 nearest-region API 실패 → 전체 하늘 표시
+    $('skyFilterCap').textContent = '우리 동네를 찾지 못했어요 (전체 표시 중)';
+    if (reconsentBtn) reconsentBtn.style.display = 'none';
   } else {
     const topRegion = findHottestRegion(skyPool);
     $('skyFilterCap').textContent = topRegion
@@ -253,10 +259,7 @@ let myBubbleIds = new Set();
 
 async function loadSky() {
   try {
-    const query = skyMode === 'local' && locationConsent === true && myRegion
-      ? `?region=${encodeURIComponent(myRegion)}`
-      : '';
-    const data = await apiFetch(`/api/sky${query}`);
+    const data = await apiFetch('/api/sky');
     if (data.bubbles && data.bubbles.length > 0) {
       skyPool = data.bubbles.map(b => ({
         ...b,
@@ -332,6 +335,10 @@ function getActivePool() {
     // region 없는 방울(기존 데이터)은 포함, region 있는 방울은 지역 일치만 포함
     const filtered = skyPool.filter(p => !p.region || p.region === myRegion);
     return filtered.length ? filtered : skyPool;
+  }
+  if (locationConsent === true) {
+    // 허용했지만 nearest-region 실패 → 전체 표시
+    return skyPool;
   }
   // 거부/폴백: 버블이 가장 많은 지역만 표시 (모두의 하늘과 차별화)
   const topRegion = findHottestRegion(skyPool);
