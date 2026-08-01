@@ -68,53 +68,88 @@ const moodOf = k => MOODS.find(m => m.key === k) || MOODS[0];
 // ── MOCK 데이터 (시간대·요일별 분기) ─────────────────────────────
 const _MOCK_SLOTS = {
   weekday_morning: [
-    { id: 'mm1', mood: 'tired',   nick: '잠이 덜 깬 북극곰',   text: '커피 없었으면 어떻게 살았을까',              time: '8분 전',   likes: 6,  region: '마포구' },
-    { id: 'mm2', mood: 'calm',    nick: '아침 이슬 한 방울',    text: '출근길 하늘이 유독 예쁜 날',                time: '15분 전',  likes: 4,  region: '용산구' },
-    { id: 'mm3', mood: 'heat',    nick: '헥헥대는 선풍기',      text: '지하철이 벌써부터 찜통이야',                time: '3분 전',   likes: 11, region: '강남구' },
-    { id: 'mm4', mood: 'calm',    nick: '포근한 솜사탕',        text: '오늘 하루도 할 수 있어',                   time: '22분 전',  likes: 5,  region: '수원시' },
-    { id: 'mm5', mood: 'heat',    nick: '땀띠 맞은 아이스팩',   text: '아침부터 이미 녹고 있어요',                 time: '11분 전',  likes: 8,  region: '해운대구' },
+    { id: 'mm1',  mood: 'tired',   nick: '잠이 덜 깬 북극곰',    text: '커피 없었으면 어떻게 살았을까',              time: '8분 전',    likes: 6,  region: '마포구' },
+    { id: 'mm2',  mood: 'calm',    nick: '아침 이슬 한 방울',     text: '출근길 하늘이 유독 예쁜 날',                 time: '15분 전',   likes: 4,  region: '용산구' },
+    { id: 'mm3',  mood: 'heat',    nick: '헥헥대는 선풍기',       text: '지하철이 벌써부터 찜통이야',                 time: '3분 전',    likes: 11, region: '강남구' },
+    { id: 'mm4',  mood: 'calm',    nick: '포근한 솜사탕',         text: '오늘 하루도 할 수 있어',                    time: '22분 전',   likes: 5,  region: '수원시' },
+    { id: 'mm5',  mood: 'heat',    nick: '땀띠 맞은 아이스팩',    text: '아침부터 이미 녹고 있어요',                  time: '11분 전',   likes: 8,  region: '해운대구' },
+    { id: 'mm6',  mood: 'tired',   nick: '출근 중인 좀비',        text: '지하철 문 닫히는 거 보면서 다음 거 탐',       time: '6분 전',    likes: 9,  region: '강동구' },
+    { id: 'mm7',  mood: 'angry',   nick: '아이스 아메리카노',     text: '아 맞다 9시 회의 있었다',                    time: '2분 전',    likes: 17, region: '여의도동' },
+    { id: 'mm8',  mood: 'joy',     nick: '아이스 아메리카노',     text: '출근길에 커피 사면 왜 기분이 좋아지냐',       time: '19분 전',   likes: 7,  region: '성동구' },
+    { id: 'mm9',  mood: 'tired',   nick: '버스잠 전문가',         text: '버스에서 자다가 두 정거장 지나침',            time: '33분 전',   likes: 14, region: '노원구' },
+    { id: 'mm10', mood: 'calm',    nick: '월요일 생존러',         text: '오늘 저녁 뭐 먹을지 이미 생각 중',           time: '41분 전',   likes: 6,  region: '분당구' },
   ],
   weekday_noon: [
-    { id: 'mn1', mood: 'calm',    nick: '점심 생각하는 다람쥐', text: '점심 뭐 먹지가 오늘의 제일 큰 고민',         time: '6분 전',   likes: 14, region: '강남구' },
-    { id: 'mn2', mood: 'tired',   nick: '느긋한 나무늘보',      text: '오후 3시 졸음이 세상에서 제일 졸려',         time: '19분 전',  likes: 9,  region: '분당구' },
-    { id: 'mn3', mood: 'angry',   nick: '부글부글 주전자',      text: '에어컨 추워서 껐더니 더워서 켰어',           time: '31분 전',  likes: 7,  region: '성동구' },
-    { id: 'mn4', mood: 'blue',    nick: '잔잔한 빗방울',        text: '뭔가 잘 안 풀리는 하루',                   time: '44분 전',  likes: 6,  region: '해운대구' },
-    { id: 'mn5', mood: 'tired',   nick: '회의실 귀신',          text: '회의 세 개 더 있음 ☆',                    time: '2분 전',   likes: 13, region: '마포구' },
+    { id: 'mn1',  mood: 'calm',    nick: '점심 생각하는 다람쥐',  text: '점심 뭐 먹지가 오늘의 제일 큰 고민',          time: '6분 전',    likes: 14, region: '강남구' },
+    { id: 'mn2',  mood: 'tired',   nick: '오후 3시의 나',         text: '오후 3시 졸음이 세상에서 제일 졸려',          time: '19분 전',   likes: 9,  region: '분당구' },
+    { id: 'mn3',  mood: 'angry',   nick: '부글부글 주전자',       text: '에어컨 추워서 껐더니 더워서 켰어',            time: '31분 전',   likes: 7,  region: '성동구' },
+    { id: 'mn4',  mood: 'blue',    nick: '잔잔한 빗방울',         text: '뭔가 잘 안 풀리는 하루',                    time: '44분 전',   likes: 6,  region: '해운대구' },
+    { id: 'mn5',  mood: 'tired',   nick: '회의실 귀신',           text: '회의 세 개 더 있음 ☆',                     time: '2분 전',    likes: 13, region: '마포구' },
+    { id: 'mn6',  mood: 'angry',   nick: '냉방병 직전 직장인',    text: '에어컨 18도 설정한 사람 이름 알고 싶다',      time: '8분 전',    likes: 21, region: '여의도동' },
+    { id: 'mn7',  mood: 'tired',   nick: '낮잠 소원 성취단',      text: '점심 먹고 10분만 자고 싶은 게 그렇게 큰 욕심이냐', time: '27분 전', likes: 18, region: '강남구' },
+    { id: 'mn8',  mood: 'heat',    nick: '배달비 계산기',         text: '배달비 5000원인데 나가기도 더워서 시킴',      time: '14분 전',   likes: 11, region: '마포구' },
+    { id: 'mn9',  mood: 'angry',   nick: '슬랙 알림 피해자',      text: '슬랙 알림 좀 꺼줘 제발 밥 먹고 있잖아',      time: '5분 전',    likes: 23, region: '성동구' },
+    { id: 'mn10', mood: 'blue',    nick: '칼퇴 각 재는 중',       text: '왜 이렇게 느리게 가냐 오늘 시간',            time: '38분 전',   likes: 9,  region: '분당구' },
   ],
   weekday_evening: [
-    { id: 'me1', mood: 'calm',    nick: '포근한 솜사탕',        text: '퇴근길 바람이 선선해',                     time: '5분 전',   likes: 4,  region: '강남구' },
-    { id: 'me2', mood: 'angry',   nick: '부글부글 주전자',      text: '지하철에서 발 밟혔다…',                   time: '1시간 전', likes: 7,  region: '강남구' },
-    { id: 'me3', mood: 'joy',     nick: '오늘의 맥주 한 캔',    text: '오늘 맥주 한 잔 해야겠다',                 time: '17분 전',  likes: 9,  region: '용산구' },
-    { id: 'me4', mood: 'calm',    nick: '귀가 중인 달팽이',     text: '집 가는 길이 제일 좋아',                   time: '28분 전',  likes: 5,  region: '수원시' },
-    { id: 'me5', mood: 'joy',     nick: '반짝이는 별사탕',      text: '드디어 월급날!!',                         time: '38분 전',  likes: 12, region: '분당구' },
+    { id: 'me1',  mood: 'calm',    nick: '귀가 중인 달팽이',      text: '퇴근길 바람이 선선해',                      time: '5분 전',    likes: 4,  region: '강남구' },
+    { id: 'me2',  mood: 'angry',   nick: '지하철 생존러',         text: '지하철에서 발 밟혔다…',                    time: '1시간 전',  likes: 7,  region: '강남구' },
+    { id: 'me3',  mood: 'joy',     nick: '오늘의 맥주 한 캔',     text: '오늘 맥주 한 잔 해야겠다',                  time: '17분 전',   likes: 9,  region: '용산구' },
+    { id: 'me4',  mood: 'calm',    nick: '집순이·집돌이',         text: '집 가는 길이 제일 좋아',                    time: '28분 전',   likes: 5,  region: '수원시' },
+    { id: 'me5',  mood: 'joy',     nick: '반짝이는 별사탕',       text: '드디어 월급날!!',                          time: '38분 전',   likes: 12, region: '분당구' },
+    { id: 'me6',  mood: 'joy',     nick: '칼퇴 성공 기념비',      text: '칼퇴하고 편의점 캔맥주 여는 이 짧은 행복',   time: '11분 전',   likes: 19, region: '마포구' },
+    { id: 'me7',  mood: 'calm',    nick: '오늘 하루 생존자',      text: '오늘 하루 버텼다 나 자신 칭찬해',            time: '23분 전',   likes: 15, region: '강동구' },
+    { id: 'me8',  mood: 'tired',   nick: '지하철 좀비',           text: '퇴근 지하철에서 아무 생각 없이 폰만 보는 중', time: '6분 전',    likes: 8,  region: '성동구' },
+    { id: 'me9',  mood: 'tired',   nick: '야근 후 퇴근자',        text: '야근하고 나오니까 하늘이 까만데 내 마음도',   time: '47분 전',   likes: 6,  region: '여의도동' },
+    { id: 'me10', mood: 'calm',    nick: '혼밥 혼술 전문가',      text: '저녁은 시켜서 넷플 보는 게 요즘 최고 루틴',  time: '19분 전',   likes: 13, region: '분당구' },
   ],
   night: [
-    { id: 'mnt1', mood: 'heat',   nick: '헥헥대는 선풍기',      text: '열대야 3일째 못 자요',                     time: '19분 전',  likes: 15, region: '대구 중구' },
-    { id: 'mnt2', mood: 'tired',  nick: '느긋한 나무늘보',      text: '오늘도 어찌저찌 살아냄',                   time: '12분 전',  likes: 9,  region: '해운대구' },
-    { id: 'mnt3', mood: 'tired',  nick: '자정 넘긴 부엉이',     text: '자야 하는데 핸드폰을 못 내려놓아',           time: '7분 전',   likes: 11, region: '마포구' },
-    { id: 'mnt4', mood: 'heat',   nick: '무더위 체감 랭킹',     text: '창문 열면 덥고 닫으면 더 더워',             time: '42분 전',  likes: 5,  region: '대구 중구', src: 'rank' },
-    { id: 'mnt5', mood: 'calm',   nick: '새벽 별 한 조각',      text: '내일이 되어도 오늘이면 좋겠다',             time: '33분 전',  likes: 3,  region: '용산구' },
+    { id: 'mnt1', mood: 'heat',    nick: '열대야 3일차',          text: '열대야 3일째 못 자요',                      time: '19분 전',   likes: 15, region: '대구 중구' },
+    { id: 'mnt2', mood: 'tired',   nick: '자정 넘긴 부엉이',      text: '오늘도 어찌저찌 살아냄',                    time: '12분 전',   likes: 9,  region: '해운대구' },
+    { id: 'mnt3', mood: 'tired',   nick: '핸드폰 못 내려놓는 손', text: '자야 하는데 핸드폰을 못 내려놓아',           time: '7분 전',    likes: 11, region: '마포구' },
+    { id: 'mnt4', mood: 'heat',    nick: '무더위 체감 랭킹',      text: '창문 열면 덥고 닫으면 더 더워',              time: '42분 전',   likes: 5,  region: '대구 중구', src: 'rank' },
+    { id: 'mnt5', mood: 'calm',    nick: '새벽 별 한 조각',       text: '내일이 되어도 오늘이면 좋겠다',              time: '33분 전',   likes: 3,  region: '용산구' },
+    { id: 'mnt6', mood: 'tired',   nick: '새벽 라면러',           text: '새벽 2시에 라면 끓이면 안 되는데 끓이는 중', time: '4분 전',    likes: 22, region: '마포구' },
+    { id: 'mnt7', mood: 'tired',   nick: '유튜브 알고리즘 피해자',text: '하나만 보고 자려다가 새벽 3시',              time: '16분 전',   likes: 17, region: '강남구' },
+    { id: 'mnt8', mood: 'heat',    nick: '선풍기 바람도 뜨거워',  text: '선풍기 틀어봤자 뜨거운 바람이 돌아다님',     time: '28분 전',   likes: 13, region: '대구 중구' },
+    { id: 'mnt9', mood: 'blue',    nick: '새벽 생각쟁이',         text: '낮에 못 다 한 생각이 새벽에 다 몰려옴',      time: '51분 전',   likes: 8,  region: '용산구' },
+    { id: 'mnt10',mood: 'calm',    nick: '새벽 동지 구함',        text: '이 새벽에 나만 깨어 있는 건 아니겠지',       time: '9분 전',    likes: 7,  region: '분당구' },
   ],
   weekend_day: [
-    { id: 'mwd1', mood: 'calm',   nick: '이불 속 감자',         text: '진짜 아무것도 안 할 거야 오늘만큼은',        time: '14분 전',  likes: 18, region: '마포구' },
-    { id: 'mwd2', mood: 'flutter',nick: '두근두근 딸기우유',    text: '브런치 웨이팅 40분인데 그냥 기다리기로 함',  time: '26분 전',  likes: 7,  region: '성동구' },
-    { id: 'mwd3', mood: 'calm',   nick: '에어컨 쐰 북극곰',    text: '에어컨 켜고 이불 덮기 성공',                time: '38분 전',  likes: 21, region: '분당구' },
-    { id: 'mwd4', mood: 'tired',  nick: '느긋한 나무늘보',      text: '낮잠 자다 깼더니 이미 저녁',                time: '1시간 전', likes: 8,  region: '수원시' },
-    { id: 'mwd5', mood: 'flutter',nick: '두근두근 딸기우유',    text: '내일 소풍 가는 날',                        time: '40분 전',  likes: 3,  region: '해운대구' },
+    { id: 'mwd1', mood: 'calm',    nick: '이불 속 감자',          text: '진짜 아무것도 안 할 거야 오늘만큼은',         time: '14분 전',   likes: 18, region: '마포구' },
+    { id: 'mwd2', mood: 'flutter', nick: '브런치 웨이터',         text: '브런치 웨이팅 40분인데 그냥 기다리기로 함',   time: '26분 전',   likes: 7,  region: '성동구' },
+    { id: 'mwd3', mood: 'calm',    nick: '에어컨 쐰 북극곰',      text: '에어컨 켜고 이불 덮기 성공',                 time: '38분 전',   likes: 21, region: '분당구' },
+    { id: 'mwd4', mood: 'tired',   nick: '낮잠 전문가',           text: '낮잠 자다 깼더니 이미 저녁',                 time: '1시간 전',  likes: 8,  region: '수원시' },
+    { id: 'mwd5', mood: 'flutter', nick: '설레는 주말러',         text: '오늘 처음 가보는 카페 도전',                 time: '40분 전',   likes: 3,  region: '해운대구' },
+    { id: 'mwd6', mood: 'calm',    nick: '할 일 목록 구경꾼',     text: '할 일 목록 작성하고 목록 구경만 하는 중',     time: '17분 전',   likes: 24, region: '마포구' },
+    { id: 'mwd7', mood: 'calm',    nick: '아무 계획 없는 행복',   text: '아무 계획 없는 주말이 사실 제일 좋음',        time: '34분 전',   likes: 16, region: '강남구' },
+    { id: 'mwd8', mood: 'joy',     nick: '배달 두 번 목표',       text: '오늘 목표: 배달 두 번 시키기',               time: '52분 전',   likes: 11, region: '성동구' },
+    { id: 'mwd9', mood: 'tired',   nick: '이불 밖은 위험해',      text: '이불 밖은 위험해 오늘은 진짜',               time: '8분 전',    likes: 19, region: '분당구' },
+    { id: 'mwd10',mood: 'calm',    nick: '주말 무계획 국룰',      text: '약속 없는 주말이 요즘 제일 행복함',           time: '1시간 전',  likes: 14, region: '수원시' },
   ],
   saturday_evening: [
-    { id: 'mse1', mood: 'calm',   nick: '토요일 저녁 노을',     text: '내일도 쉬는 날이라 다행이야',              time: '11분 전',  likes: 14, region: '마포구' },
-    { id: 'mse2', mood: 'joy',    nick: '반짝이는 별사탕',      text: '오늘 저녁은 치킨 시켜 먹기로 했어',         time: '23분 전',  likes: 8,  region: '용산구' },
-    { id: 'mse3', mood: 'calm',   nick: '귀가 중인 달팽이',     text: '저녁 약속 취소당했는데 사실 다행인 것 같아', time: '37분 전',  likes: 6,  region: '분당구' },
-    { id: 'mse4', mood: 'joy',    nick: '토요일 밤의 별',       text: '토요일 밤이 제일 좋아',                   time: '16분 전',  likes: 19, region: '강남구' },
-    { id: 'mse5', mood: 'flutter',nick: '여름 저녁 반딧불',     text: '밖은 더운데 나가기 아까운 여름',           time: '34분 전',  likes: 6,  region: '해운대구' },
+    { id: 'mse1', mood: 'calm',    nick: '토요일 저녁 노을',      text: '내일도 쉬는 날이라 다행이야',                time: '11분 전',   likes: 14, region: '마포구' },
+    { id: 'mse2', mood: 'joy',     nick: '치킨 시킨 사람',        text: '오늘 저녁은 치킨 시켜 먹기로 했어',          time: '23분 전',   likes: 8,  region: '용산구' },
+    { id: 'mse3', mood: 'calm',    nick: '약속 취소 안도자',      text: '저녁 약속 취소당했는데 사실 다행인 것 같아',  time: '37분 전',   likes: 6,  region: '분당구' },
+    { id: 'mse4', mood: 'joy',     nick: '토요일 밤의 별',        text: '토요일 밤이 제일 좋아',                     time: '16분 전',   likes: 19, region: '강남구' },
+    { id: 'mse5', mood: 'flutter', nick: '여름 저녁 반딧불',      text: '밖은 더운데 나가기 아까운 여름',             time: '34분 전',   likes: 6,  region: '해운대구' },
+    { id: 'mse6', mood: 'calm',    nick: '토밤 혼자 행복',        text: '토요일 밤에 혼자 있는 거 사실 너무 좋음',     time: '9분 전',    likes: 17, region: '강동구' },
+    { id: 'mse7', mood: 'joy',     nick: '치맥 국룰러',           text: '치킨+맥주+넷플 조합 이게 바로 힐링임',        time: '28분 전',   likes: 22, region: '마포구' },
+    { id: 'mse8', mood: 'calm',    nick: '아무것도 안 한 행복',   text: '오늘 아무것도 안 했는데 잘 쉰 것 같은 느낌',  time: '43분 전',   likes: 9,  region: '성동구' },
+    { id: 'mse9', mood: 'blue',    nick: '주말 속도위반 신고자',   text: '주말이 빨리 간다는 게 실감되는 토요일 저녁',  time: '21분 전',   likes: 12, region: '분당구' },
+    { id: 'mse10',mood: 'calm',    nick: '내일도 쉬는 여유',      text: '내일이 일요일이라는 사실이 아직은 괜찮음',    time: '55분 전',   likes: 8,  region: '용산구' },
   ],
   sunday_evening: [
-    { id: 'mwe1', mood: 'blue',   nick: '일요일 밤의 달',       text: '주말이 왜 이렇게 빨리 가는 거야',           time: '9분 전',   likes: 16, region: '강남구' },
-    { id: 'mwe2', mood: 'blue',   nick: '잔잔한 빗방울',        text: '일요일 밤의 이 기분 아는 사람',             time: '21분 전',  likes: 10, region: '용산구' },
-    { id: 'mwe3', mood: 'blue',   nick: '월요일 예감 탐정',     text: '내일 월요일이라는 게 실감이 안 나',          time: '34분 전',  likes: 8,  region: '성동구' },
-    { id: 'mwe4', mood: 'calm',   nick: '포근한 솜사탕',        text: '오늘 하루 꽤 잘 쉬었다',                   time: '47분 전',  likes: 4,  region: '성동구' },
-    { id: 'mwe5', mood: 'heat',   nick: '무더위 체감 랭킹',     text: '비와서 꿉꿉해',                           time: '42분 전',  likes: 5,  region: '대구 중구', src: 'rank' },
+    { id: 'mwe1', mood: 'blue',    nick: '일요일 밤의 달',        text: '주말이 왜 이렇게 빨리 가는 거야',            time: '9분 전',    likes: 16, region: '강남구' },
+    { id: 'mwe2', mood: 'blue',    nick: '일요병 환자',           text: '일요일 밤의 이 기분 아는 사람',              time: '21분 전',   likes: 10, region: '용산구' },
+    { id: 'mwe3', mood: 'blue',    nick: '월요일 예감 탐정',      text: '내일 월요일이라는 게 실감이 안 나',           time: '34분 전',   likes: 8,  region: '성동구' },
+    { id: 'mwe4', mood: 'calm',    nick: '일요일 생존자',         text: '오늘 하루 꽤 잘 쉬었다',                    time: '47분 전',   likes: 4,  region: '성동구' },
+    { id: 'mwe5', mood: 'heat',    nick: '무더위 체감 랭킹',      text: '비와서 꿉꿉해',                             time: '42분 전',   likes: 5,  region: '대구 중구', src: 'rank' },
+    { id: 'mwe6', mood: 'blue',    nick: '일요일 밤의 결심러',    text: '일요일 밤마다 새로 시작하는 사람이 되려는 나',time: '6분 전',    likes: 20, region: '마포구' },
+    { id: 'mwe7', mood: 'blue',    nick: '월요병 조기 발병자',    text: '월요일이 싫은 게 아니라 일요일 밤이 싫은 거야',time: '18분 전',   likes: 14, region: '강남구' },
+    { id: 'mwe8', mood: 'blue',    nick: '일요일 저녁 8시',       text: '일요일 저녁 8시 = 이미 월요일 오전',         time: '31분 전',   likes: 18, region: '분당구' },
+    { id: 'mwe9', mood: 'tired',   nick: '주말 쉬었는데 피곤해',  text: '주말에 한 거 없는데 왜 피곤하지',            time: '53분 전',   likes: 11, region: '수원시' },
+    { id: 'mwe10',mood: 'blue',    nick: '다음 주말까지 5일',     text: '다음 주말까지 5일 남았다는 게 실화냐',        time: '13분 전',   likes: 15, region: '강동구' },
   ],
 };
 
@@ -123,14 +158,17 @@ function getMockPool() {
   const day = now.getDay(); // 0=일, 1=월…6=토
   const h = now.getHours();
   const isWeekend = (day === 0 || day === 6);
-  if (h >= 21 || h < 6) return _MOCK_SLOTS.night;
-  if (!isWeekend) {
-    if (h < 10) return _MOCK_SLOTS.weekday_morning;
-    if (h < 17) return _MOCK_SLOTS.weekday_noon;
-    return _MOCK_SLOTS.weekday_evening;
+  let slot;
+  if (h >= 21 || h < 6) slot = _MOCK_SLOTS.night;
+  else if (!isWeekend) {
+    if (h < 10) slot = _MOCK_SLOTS.weekday_morning;
+    else if (h < 17) slot = _MOCK_SLOTS.weekday_noon;
+    else slot = _MOCK_SLOTS.weekday_evening;
+  } else {
+    slot = h < 18 ? _MOCK_SLOTS.weekend_day : (day === 6 ? _MOCK_SLOTS.saturday_evening : _MOCK_SLOTS.sunday_evening);
   }
-  if (h < 18) return _MOCK_SLOTS.weekend_day;
-  return day === 6 ? _MOCK_SLOTS.saturday_evening : _MOCK_SLOTS.sunday_evening;
+  // 10개 풀에서 랜덤 5개 추출
+  return [...slot].sort(() => Math.random() - 0.5).slice(0, 5);
 }
 
 // ── DOM 헬퍼 ────────────────────────────────────────────────────
