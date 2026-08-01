@@ -7,6 +7,7 @@ import {
   saveBase64Data,
   Accuracy,
   getCurrentLocation,
+  Storage,
 } from '@apps-in-toss/web-framework';
 import html2canvas from 'html2canvas-pro';
 
@@ -899,6 +900,84 @@ $('skyReconsentBtn')?.addEventListener('click', () => {
   goToSky('local');
 });
 
+// ── 업데이트 노트 ──────────────────────────────────────────────────
+const CHANGELOG = [
+  {
+    version: '2026-08-01',
+    summary: '시간대·요일별 맞춤 방울 + 48h 유지',
+    detail: [
+      '아침·낮·저녁, 평일·주말 분위기에 맞는 방울이 올라와요',
+      '방울이 48시간 동안 하늘에 머물도록 연장됐어요',
+      '일요일 밤과 토요일 저녁의 분위기가 구분돼요',
+    ],
+  },
+];
+
+const UPDATE_NOTE_SEEN_KEY = 'mudeowebubble_update_note_seen_v1';
+
+async function getSeenUpdateVersion() {
+  try { return await Storage.get(UPDATE_NOTE_SEEN_KEY); } catch (_) { return null; }
+}
+async function setSeenUpdateVersion(v) {
+  try { await Storage.set(UPDATE_NOTE_SEEN_KEY, v); } catch (_) {}
+}
+
+async function initUpdateNote() {
+  const latest = CHANGELOG[0];
+  const seen = await getSeenUpdateVersion();
+  const note = $('updateNote');
+  if (!note || seen === latest.version) return;
+
+  $('updateNoteSummary').textContent = latest.summary;
+  const detailEl = $('updateNoteDetail');
+  detailEl.innerHTML = latest.detail.map(d => `<div>• ${d}</div>`).join('');
+  note.style.display = 'flex';
+
+  note.addEventListener('click', toggleUpdateNoteExpand);
+  $('updateNoteClose').addEventListener('click', (e) => {
+    e.stopPropagation();
+    dismissUpdateNote();
+  });
+}
+
+function toggleUpdateNoteExpand() {
+  $('updateNoteDetail')?.classList.toggle('open');
+}
+
+async function dismissUpdateNote() {
+  const note = $('updateNote');
+  if (!note) return;
+  note.style.display = 'none';
+  await setSeenUpdateVersion(CHANGELOG[0].version);
+}
+
+// ── 크로스 프로모 배너 ─────────────────────────────────────────────
+const CROSSPROMO_LIVE = true;
+let crossPromoFloatTimer = null;
+
+function initCrossPromoBanner() {
+  if (!CROSSPROMO_LIVE) return;
+  crossPromoFloatTimer = setTimeout(() => {
+    $('crosspromoFloat')?.classList.add('show');
+  }, 1500);
+
+  $('crosspromoCard')?.addEventListener('click', openCrossPromo);
+  $('crosspromoDismiss')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    closeCrossPromoFloat();
+  });
+}
+
+function closeCrossPromoFloat() {
+  clearTimeout(crossPromoFloatTimer);
+  $('crosspromoFloat')?.classList.remove('show');
+}
+
+function openCrossPromo() {
+  trackClick({ log_name: 'cross_promo_heatrank' });
+  openURL(HEATRANK_DEEPLINK).catch(() => {});
+}
+
 // ── 초기화 ──────────────────────────────────────────────────────
 async function init() {
   initSafeArea();
@@ -926,6 +1005,8 @@ async function init() {
   });
   loadMoodSummary();
   trackScreen({ log_name: 'sky_home', sky_mode: skyMode });
+  initUpdateNote();
+  initCrossPromoBanner();
 }
 
 // D: 첫 방문 코치마크
