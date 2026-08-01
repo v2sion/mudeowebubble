@@ -4,7 +4,7 @@
 
 import { redis, setCors } from './_lib/redis.js';
 
-const TTL_MS = 24 * 60 * 60 * 1000;
+const TTL_MS = 48 * 60 * 60 * 1000;
 const MAX_BUBBLES = 50;
 
 export default async function handler(req, res) {

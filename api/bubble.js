@@ -8,7 +8,7 @@ import { generateNickname } from './_lib/nickname.js';
 const VALID_MOODS = ['joy', 'flutter', 'calm', 'tired', 'blue', 'angry', 'heat'];
 const MAX_TEXT = 20;
 const COOLDOWN_S = 600;
-const BUBBLE_TTL_S = 86400;
+const BUBBLE_TTL_S = 172800;
 const MY_BUBBLE_TTL_S = 86400 * 30;
 
 function nanoid() {

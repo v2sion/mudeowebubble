@@ -64,17 +64,65 @@ const MOODS = [
 ];
 const moodOf = k => MOODS.find(m => m.key === k) || MOODS[0];
 
-// ── MOCK 데이터 (API 미배포 상태에서도 동작하게) ─────────────────
-const MOCK_POOL = [
-  { id: 'm1', mood: 'calm',    nick: '포근한 솜사탕',     text: '퇴근길 바람이 선선해',      time: '5분 전',  likes: 4,  region: '강남구' },
-  { id: 'm2', mood: 'tired',   nick: '느긋한 나무늘보',   text: '오늘도 어찌저찌 살아냄',    time: '12분 전', likes: 9,  region: '해운대구' },
-  { id: 'm3', mood: 'joy',     nick: '반짝이는 별사탕',   text: '드디어 월급날!!',          time: '23분 전', likes: 12, region: '강남구' },
-  { id: 'm4', mood: 'blue',    nick: '잔잔한 빗방울',     text: '',                       time: '31분 전', likes: 6,  region: '수원시' },
-  { id: 'm5', mood: 'flutter', nick: '두근두근 딸기우유', text: '내일 소풍 가는 날',         time: '40분 전', likes: 3,  region: '분당구' },
-  { id: 'm6', mood: 'angry',   nick: '부글부글 주전자',   text: '지하철에서 발 밟혔다…',    time: '1시간 전', likes: 7,  region: '강남구' },
-  { id: 'm7', mood: 'heat',    nick: '헥헥대는 선풍기',   text: '열대야 3일째 못 자요',      time: '19분 전', likes: 15, region: '대구 중구' },
-  { id: 'm8', mood: 'heat',    nick: '무더위 체감 랭킹',  text: '비와서 꿉꿉해',           time: '42분 전', likes: 5,  src: 'rank', region: '대구 중구' },
-];
+// ── MOCK 데이터 (시간대·요일별 분기) ─────────────────────────────
+const _MOCK_SLOTS = {
+  weekday_morning: [
+    { id: 'mm1', mood: 'tired',   nick: '잠이 덜 깬 북극곰',   text: '커피 없었으면 어떻게 살았을까',              time: '8분 전',   likes: 6,  region: '마포구' },
+    { id: 'mm2', mood: 'calm',    nick: '아침 이슬 한 방울',    text: '출근길 하늘이 유독 예쁜 날',                time: '15분 전',  likes: 4,  region: '용산구' },
+    { id: 'mm3', mood: 'heat',    nick: '헥헥대는 선풍기',      text: '지하철이 벌써부터 찜통이야',                time: '3분 전',   likes: 11, region: '강남구' },
+    { id: 'mm4', mood: 'calm',    nick: '포근한 솜사탕',        text: '오늘 하루도 할 수 있어',                   time: '22분 전',  likes: 5,  region: '수원시' },
+    { id: 'mm5', mood: 'heat',    nick: '땀띠 맞은 아이스팩',   text: '아침부터 이미 녹고 있어요',                 time: '11분 전',  likes: 8,  region: '해운대구' },
+  ],
+  weekday_noon: [
+    { id: 'mn1', mood: 'calm',    nick: '점심 생각하는 다람쥐', text: '점심 뭐 먹지가 오늘의 제일 큰 고민',         time: '6분 전',   likes: 14, region: '강남구' },
+    { id: 'mn2', mood: 'tired',   nick: '느긋한 나무늘보',      text: '오후 3시 졸음이 세상에서 제일 졸려',         time: '19분 전',  likes: 9,  region: '분당구' },
+    { id: 'mn3', mood: 'angry',   nick: '부글부글 주전자',      text: '에어컨 추워서 껐더니 더워서 켰어',           time: '31분 전',  likes: 7,  region: '성동구' },
+    { id: 'mn4', mood: 'blue',    nick: '잔잔한 빗방울',        text: '뭔가 잘 안 풀리는 하루',                   time: '44분 전',  likes: 6,  region: '해운대구' },
+    { id: 'mn5', mood: 'tired',   nick: '회의실 귀신',          text: '회의 세 개 더 있음 ☆',                    time: '2분 전',   likes: 13, region: '마포구' },
+  ],
+  weekday_evening: [
+    { id: 'me1', mood: 'calm',    nick: '포근한 솜사탕',        text: '퇴근길 바람이 선선해',                     time: '5분 전',   likes: 4,  region: '강남구' },
+    { id: 'me2', mood: 'angry',   nick: '부글부글 주전자',      text: '지하철에서 발 밟혔다…',                   time: '1시간 전', likes: 7,  region: '강남구' },
+    { id: 'me3', mood: 'joy',     nick: '오늘의 맥주 한 캔',    text: '오늘 맥주 한 잔 해야겠다',                 time: '17분 전',  likes: 9,  region: '용산구' },
+    { id: 'me4', mood: 'calm',    nick: '귀가 중인 달팽이',     text: '집 가는 길이 제일 좋아',                   time: '28분 전',  likes: 5,  region: '수원시' },
+    { id: 'me5', mood: 'joy',     nick: '반짝이는 별사탕',      text: '드디어 월급날!!',                         time: '38분 전',  likes: 12, region: '분당구' },
+  ],
+  night: [
+    { id: 'mnt1', mood: 'heat',   nick: '헥헥대는 선풍기',      text: '열대야 3일째 못 자요',                     time: '19분 전',  likes: 15, region: '대구 중구' },
+    { id: 'mnt2', mood: 'tired',  nick: '느긋한 나무늘보',      text: '오늘도 어찌저찌 살아냄',                   time: '12분 전',  likes: 9,  region: '해운대구' },
+    { id: 'mnt3', mood: 'tired',  nick: '자정 넘긴 부엉이',     text: '자야 하는데 핸드폰을 못 내려놓아',           time: '7분 전',   likes: 11, region: '마포구' },
+    { id: 'mnt4', mood: 'heat',   nick: '무더위 체감 랭킹',     text: '창문 열면 덥고 닫으면 더 더워',             time: '42분 전',  likes: 5,  region: '대구 중구', src: 'rank' },
+    { id: 'mnt5', mood: 'calm',   nick: '새벽 별 한 조각',      text: '내일이 되어도 오늘이면 좋겠다',             time: '33분 전',  likes: 3,  region: '용산구' },
+  ],
+  weekend_day: [
+    { id: 'mwd1', mood: 'calm',   nick: '이불 속 감자',         text: '진짜 아무것도 안 할 거야 오늘만큼은',        time: '14분 전',  likes: 18, region: '마포구' },
+    { id: 'mwd2', mood: 'flutter',nick: '두근두근 딸기우유',    text: '브런치 웨이팅 40분인데 그냥 기다리기로 함',  time: '26분 전',  likes: 7,  region: '성동구' },
+    { id: 'mwd3', mood: 'calm',   nick: '에어컨 쐰 북극곰',    text: '에어컨 켜고 이불 덮기 성공',                time: '38분 전',  likes: 21, region: '분당구' },
+    { id: 'mwd4', mood: 'tired',  nick: '느긋한 나무늘보',      text: '낮잠 자다 깼더니 이미 저녁',                time: '1시간 전', likes: 8,  region: '수원시' },
+    { id: 'mwd5', mood: 'flutter',nick: '두근두근 딸기우유',    text: '내일 소풍 가는 날',                        time: '40분 전',  likes: 3,  region: '해운대구' },
+  ],
+  weekend_evening: [
+    { id: 'mwe1', mood: 'blue',   nick: '일요일 밤의 달',       text: '주말이 왜 이렇게 빨리 가는 거야',           time: '9분 전',   likes: 16, region: '강남구' },
+    { id: 'mwe2', mood: 'blue',   nick: '잔잔한 빗방울',        text: '일요일 밤의 이 기분 아는 사람',             time: '21분 전',  likes: 10, region: '용산구' },
+    { id: 'mwe3', mood: 'flutter',nick: '여름 저녁 반딧불',     text: '밖은 더운데 나가기 아까운 여름',            time: '34분 전',  likes: 6,  region: '해운대구' },
+    { id: 'mwe4', mood: 'calm',   nick: '포근한 솜사탕',        text: '오늘 하루 꽤 잘 쉬었다',                   time: '47분 전',  likes: 4,  region: '성동구' },
+    { id: 'mwe5', mood: 'heat',   nick: '무더위 체감 랭킹',     text: '비와서 꿉꿉해',                           time: '42분 전',  likes: 5,  region: '대구 중구', src: 'rank' },
+  ],
+};
+
+function getMockPool() {
+  const now = new Date();
+  const day = now.getDay(); // 0=일, 1=월…6=토
+  const h = now.getHours();
+  const isWeekend = (day === 0 || day === 6);
+  if (h >= 21 || h < 6) return _MOCK_SLOTS.night;
+  if (!isWeekend) {
+    if (h < 10) return _MOCK_SLOTS.weekday_morning;
+    if (h < 17) return _MOCK_SLOTS.weekday_noon;
+    return _MOCK_SLOTS.weekday_evening;
+  }
+  return h < 18 ? _MOCK_SLOTS.weekend_day : _MOCK_SLOTS.weekend_evening;
+}
 
 // ── DOM 헬퍼 ────────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -270,7 +318,7 @@ function renderSkyFilterCap() {
 }
 
 // ── 방울 풀 & 스트림 ─────────────────────────────────────────────
-let skyPool = [...MOCK_POOL];
+let skyPool = getMockPool();
 let myBubbleIds = new Set();
 
 async function loadSky() {
