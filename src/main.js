@@ -923,6 +923,7 @@ async function setSeenUpdateVersion(v) {
 }
 
 async function initUpdateNote() {
+  return; // 업데이트 노트 임시 숨김 — 추후 활성화
   const latest = CHANGELOG[0];
   const seen = await getSeenUpdateVersion();
   const note = $('updateNote');
@@ -953,14 +954,10 @@ async function dismissUpdateNote() {
 
 // ── 크로스 프로모 배너 ─────────────────────────────────────────────
 const CROSSPROMO_LIVE = true;
-let crossPromoFloatTimer = null;
 
 function initCrossPromoBanner() {
   if (!CROSSPROMO_LIVE) return;
-  crossPromoFloatTimer = setTimeout(() => {
-    $('crosspromoFloat')?.classList.add('show');
-  }, 1500);
-
+  $('crosspromoFloat')?.classList.add('show');
   $('crosspromoCard')?.addEventListener('click', openCrossPromo);
   $('crosspromoDismiss')?.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -969,7 +966,6 @@ function initCrossPromoBanner() {
 }
 
 function closeCrossPromoFloat() {
-  clearTimeout(crossPromoFloatTimer);
   $('crosspromoFloat')?.classList.remove('show');
 }
 

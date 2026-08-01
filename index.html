@@ -455,15 +455,9 @@
     cursor:pointer;font-size:16px;color:var(--ink-300);padding:2px;line-height:1;
   }
 
-  /* ── 크로스 프로모 배너 (z-index 65, .screens:60 위) ── */
-  .crosspromo-float{
-    position:absolute;left:16px;right:16px;
-    bottom:calc(72px + var(--toss-safe-bottom));
-    z-index:65;
-    opacity:0;transform:translateY(16px);pointer-events:none;
-    transition:opacity .28s ease, transform .35s cubic-bezier(0.34,1.56,0.64,1);
-  }
-  .crosspromo-float.show{opacity:1;transform:translateY(0);pointer-events:auto}
+  /* ── 크로스 프로모 배너 (.sky-top 내 인라인) ── */
+  .crosspromo-float{display:none;margin-top:10px}
+  .crosspromo-float.show{display:flex}
   .crosspromo-card{
     display:flex;align-items:center;gap:10px;
     background:var(--white);border-radius:var(--radius-md);
@@ -653,13 +647,23 @@
           <span class="hw-main" id="heatWidgetMain">지금 전국 1위 <b id="heatWidgetCity">로딩 중…</b></span>
           <span class="hw-go">무더위 체감 랭킹에서 보기 →<br><span class="hw-cap">미니앱으로 이동해요</span></span>
         </div>
-        <div class="update-note" id="updateNote">
+        <div class="update-note" id="updateNote" style="display:none">
           <span class="update-note-icon">🔔</span>
           <div class="update-note-body">
             <div class="update-note-summary" id="updateNoteSummary"></div>
             <div class="update-note-detail" id="updateNoteDetail"></div>
           </div>
           <button class="update-note-close" id="updateNoteClose">×</button>
+        </div>
+        <div class="crosspromo-float" id="crosspromoFloat">
+          <div class="crosspromo-card" id="crosspromoCard">
+            <span class="crosspromo-icon">🔥</span>
+            <div class="crosspromo-text">
+              <div class="crosspromo-label">무더위 체감 랭킹</div>
+              <div class="crosspromo-sub">지금 우리 동네 체감온도는?</div>
+            </div>
+            <button class="crosspromo-dismiss" id="crosspromoDismiss">×</button>
+          </div>
         </div>
       </div>
 
@@ -827,17 +831,7 @@
     </div>
   </div>
 
-  <!-- ====== 크로스 프로모 배너 (z-index 65) ====== -->
-  <div class="crosspromo-float" id="crosspromoFloat">
-    <div class="crosspromo-card" id="crosspromoCard">
-      <span class="crosspromo-icon">🔥</span>
-      <div class="crosspromo-text">
-        <div class="crosspromo-label">무더위 체감 랭킹</div>
-        <div class="crosspromo-sub">지금 우리 동네 체감온도는?</div>
-      </div>
-      <button class="crosspromo-dismiss" id="crosspromoDismiss">×</button>
-    </div>
-  </div>
+
 </div>
 
 <script type="module" src="/src/main.js"></script>
