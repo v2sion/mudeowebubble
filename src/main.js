@@ -101,10 +101,17 @@ const _MOCK_SLOTS = {
     { id: 'mwd4', mood: 'tired',  nick: '느긋한 나무늘보',      text: '낮잠 자다 깼더니 이미 저녁',                time: '1시간 전', likes: 8,  region: '수원시' },
     { id: 'mwd5', mood: 'flutter',nick: '두근두근 딸기우유',    text: '내일 소풍 가는 날',                        time: '40분 전',  likes: 3,  region: '해운대구' },
   ],
-  weekend_evening: [
+  saturday_evening: [
+    { id: 'mse1', mood: 'calm',   nick: '토요일 저녁 노을',     text: '내일도 쉬는 날이라 다행이야',              time: '11분 전',  likes: 14, region: '마포구' },
+    { id: 'mse2', mood: 'joy',    nick: '반짝이는 별사탕',      text: '오늘 저녁은 치킨 시켜 먹기로 했어',         time: '23분 전',  likes: 8,  region: '용산구' },
+    { id: 'mse3', mood: 'calm',   nick: '귀가 중인 달팽이',     text: '저녁 약속 취소당했는데 사실 다행인 것 같아', time: '37분 전',  likes: 6,  region: '분당구' },
+    { id: 'mse4', mood: 'joy',    nick: '토요일 밤의 별',       text: '토요일 밤이 제일 좋아',                   time: '16분 전',  likes: 19, region: '강남구' },
+    { id: 'mse5', mood: 'flutter',nick: '여름 저녁 반딧불',     text: '밖은 더운데 나가기 아까운 여름',           time: '34분 전',  likes: 6,  region: '해운대구' },
+  ],
+  sunday_evening: [
     { id: 'mwe1', mood: 'blue',   nick: '일요일 밤의 달',       text: '주말이 왜 이렇게 빨리 가는 거야',           time: '9분 전',   likes: 16, region: '강남구' },
     { id: 'mwe2', mood: 'blue',   nick: '잔잔한 빗방울',        text: '일요일 밤의 이 기분 아는 사람',             time: '21분 전',  likes: 10, region: '용산구' },
-    { id: 'mwe3', mood: 'flutter',nick: '여름 저녁 반딧불',     text: '밖은 더운데 나가기 아까운 여름',            time: '34분 전',  likes: 6,  region: '해운대구' },
+    { id: 'mwe3', mood: 'blue',   nick: '월요일 예감 탐정',     text: '내일 월요일이라는 게 실감이 안 나',          time: '34분 전',  likes: 8,  region: '성동구' },
     { id: 'mwe4', mood: 'calm',   nick: '포근한 솜사탕',        text: '오늘 하루 꽤 잘 쉬었다',                   time: '47분 전',  likes: 4,  region: '성동구' },
     { id: 'mwe5', mood: 'heat',   nick: '무더위 체감 랭킹',     text: '비와서 꿉꿉해',                           time: '42분 전',  likes: 5,  region: '대구 중구', src: 'rank' },
   ],
@@ -121,7 +128,8 @@ function getMockPool() {
     if (h < 17) return _MOCK_SLOTS.weekday_noon;
     return _MOCK_SLOTS.weekday_evening;
   }
-  return h < 18 ? _MOCK_SLOTS.weekend_day : _MOCK_SLOTS.weekend_evening;
+  if (h < 18) return _MOCK_SLOTS.weekend_day;
+  return day === 6 ? _MOCK_SLOTS.saturday_evening : _MOCK_SLOTS.sunday_evening;
 }
 
 // ── DOM 헬퍼 ────────────────────────────────────────────────────
