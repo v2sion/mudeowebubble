@@ -208,7 +208,7 @@ function goToScreen(i) {
   currentScreen = i;
   updateNavHighlight();
   if (i !== 0) hidePop();
-  if (i === 1) loadMe();
+  if (i === 1) setTimeout(() => { if (currentScreen === 1) loadMe(); }, 400);
 }
 function updateNavHighlight() {
   const btns = [...$('appNav').children];
@@ -598,12 +598,13 @@ function popBubble(rec) {
   cancelAnimationFrame(rec.rafId);
   rec.wand.classList.add('detached');
   setTimeout(() => { if (rec.wand.isConnected) rec.wand.remove(); }, 220);
-  const cx = parseFloat(rec.el.style.left), cy = parseFloat(rec.el.style.top);
+  const cx = rec.x;
+  const cy = rec.y - (rec.size || POP_SIZE) / 2;
   const curSize = rec.size || 300;
   rec.el.animate([
-    { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
-    { transform: 'translate(-50%,-50%) scale(1.15)', opacity: 0.85, offset: 0.3 },
-    { transform: 'translate(-50%,-50%) scale(1.3)', opacity: 0, offset: 1 },
+    { transform: 'translate(-50%,-100%) scale(1)', opacity: 1 },
+    { transform: 'translate(-50%,-100%) scale(1.15)', opacity: 0.85, offset: 0.3 },
+    { transform: 'translate(-50%,-100%) scale(1.3)', opacity: 0, offset: 1 },
   ], { duration: 200, easing: 'ease-out' }).onfinish = () => rec.el.remove();
   setTimeout(() => { if (rec.el.isConnected) rec.el.remove(); }, 260);
   const s1 = $('s1');
@@ -668,8 +669,6 @@ function skyBlowStart(e) {
     }
     r.size = s;
     r.el.style.width = r.el.style.height = s + 'px';
-    r.el.style.left = r.x + 'px';
-    r.el.style.top = (r.y - s / 2) + 'px';
     r.rafId = requestAnimationFrame(grow);
   }
   rec.rafId = requestAnimationFrame(grow);
@@ -682,7 +681,7 @@ function skyBlowMove(e) {
   b.x = touchX; b.y = touchY - WAND_RING_OFFSET;
   b.wand.style.transform = `translate(calc(${touchX}px - 50%), calc(${touchY}px - 100%))`;
   b.el.style.left = b.x + 'px';
-  b.el.style.top = (b.y - (b.size || 16) / 2) + 'px';
+  b.el.style.top = b.y + 'px';
 }
 function skyBlowEnd(e) {
   const b = activeBlows.get(e.pointerId);
@@ -701,12 +700,12 @@ function skyBlowEnd(e) {
   const d1 = randDx(mag), d2 = randDx(mag * 1.1), d3 = randDx(mag), d4 = randDx(mag * 0.8), d5 = randDx(mag * 0.6);
   const dur = 3200 + size * 22;
   b.el.animate([
-    { transform: 'translate(-50%,-50%) translate(0px,0px) rotate(-3deg)', opacity: 1, offset: 0 },
-    { transform: `translate(-50%,-50%) translate(${d1}px,${-rise * 0.22}px) rotate(3deg)`, opacity: 1, offset: 0.22 },
-    { transform: `translate(-50%,-50%) translate(${d2}px,${-rise * 0.46}px) rotate(-3deg)`, opacity: 1, offset: 0.46 },
-    { transform: `translate(-50%,-50%) translate(${d3}px,${-rise * 0.7}px) rotate(2deg)`, opacity: 1, offset: 0.7 },
-    { transform: `translate(-50%,-50%) translate(${d4}px,${-rise * 0.9}px) rotate(-2deg)`, opacity: 0.75, offset: 0.9 },
-    { transform: `translate(-50%,-50%) translate(${d5}px,${-rise}px) rotate(2deg)`, opacity: 0, offset: 1 },
+    { transform: 'translate(-50%,-100%) translate(0px,0px) rotate(-3deg)', opacity: 1, offset: 0 },
+    { transform: `translate(-50%,-100%) translate(${d1}px,${-rise * 0.22}px) rotate(3deg)`, opacity: 1, offset: 0.22 },
+    { transform: `translate(-50%,-100%) translate(${d2}px,${-rise * 0.46}px) rotate(-3deg)`, opacity: 1, offset: 0.46 },
+    { transform: `translate(-50%,-100%) translate(${d3}px,${-rise * 0.7}px) rotate(2deg)`, opacity: 1, offset: 0.7 },
+    { transform: `translate(-50%,-100%) translate(${d4}px,${-rise * 0.9}px) rotate(-2deg)`, opacity: 0.75, offset: 0.9 },
+    { transform: `translate(-50%,-100%) translate(${d5}px,${-rise}px) rotate(2deg)`, opacity: 0, offset: 1 },
   ], { duration: dur, easing: 'ease-in-out' }).onfinish = () => b.el.remove();
   setTimeout(() => { if (b.el.isConnected) b.el.remove(); }, dur + 600);
   trackClick({ log_name: 'bubble_blow', size: Math.round(size) });
@@ -836,69 +835,74 @@ function showSkyToast(msg) {
 
 // ── 내 방울함 (화면 2) ───────────────────────────────────────────
 let myNick = '';
+let meCache = null;
+
+function renderMe(data) {
+  myNick = data.nick || myNick;
+  $('meNick').textContent = data.nick || '';
+  $('meTotalLikes').textContent = data.totalLikes || 0;
+
+  const weekMoods = data.weekMoods || {};
+  const total = Object.values(weekMoods).reduce((a, b) => a + b, 0);
+  $('meWeekCount').textContent = total;
+  if (total > 0) {
+    $('weekBar').innerHTML = Object.entries(weekMoods).map(([k, n]) =>
+      `<div style="flex:${n};background:${moodOf(k).color}"></div>`).join('');
+    $('weekLegend').innerHTML = Object.entries(weekMoods).map(([k, n]) =>
+      `<span><i style="background:${moodOf(k).color}"></i>${moodOf(k).label} ${n}</span>`).join('');
+    const topMoodKey = Object.entries(weekMoods).sort((a, b) => b[1] - a[1])[0][0];
+    const top = moodOf(topMoodKey);
+    $('weekComment').textContent = `${top.label}이 많은 한 주였어요 — 오늘은 평온한 방울 하나 어때요?`;
+  } else {
+    $('weekBar').innerHTML = '<div style="flex:1;background:var(--ink-100)"></div>';
+    $('weekLegend').innerHTML = '';
+    $('weekComment').textContent = '이번 주 첫 방울을 날려보세요 🫧';
+  }
+
+  const bubbles = data.bubbles || [];
+  myBubbleIds = new Set(bubbles.map(b => b.id));
+  $('myList').innerHTML = bubbles.length === 0
+    ? '<div style="color:var(--ink-300);font-size:var(--font-size-caption);font-weight:600;margin-top:16px;line-height:1.7">아직 날린 방울이 없어요 🫧<br>첫 방울을 하늘로 띄워보세요</div>'
+    : bubbles.map(b => `
+      <div class="my-bubble-row ${b.expired ? 'gone' : ''}" data-id="${b.id}">
+        <span class="bd" style="background:${moodOf(b.mood).color}"></span>
+        <p>${b.text || '말 없이 날린 방울'}</p>
+        <span class="meta">${relTime(b.createdAt)} · 공감 ${b.likes}</span>
+      </div>`).join('');
+
+  $('myList').querySelectorAll('.my-bubble-row').forEach(row => {
+    let pressTimer;
+    row.addEventListener('pointerdown', () => {
+      pressTimer = setTimeout(async () => {
+        if (!confirm('이 방울을 즉시 삭제할까요?')) return;
+        const id = row.dataset.id;
+        await apiFetch('/api/me', { method: 'POST', body: JSON.stringify({ action: 'delete', id }) }).catch(() => {});
+        row.remove();
+      }, 600);
+    });
+    row.addEventListener('pointerup', () => clearTimeout(pressTimer));
+    row.addEventListener('pointercancel', () => clearTimeout(pressTimer));
+  });
+}
 
 async function loadMe() {
+  // 캐시 있으면 즉시 렌더, 백그라운드에서 갱신 (stale-while-revalidate)
+  if (meCache) renderMe(meCache);
   try {
     const data = await apiFetch('/api/me');
-    myNick = data.nick || myNick;
-    $('meNick').textContent = data.nick || '';
-    $('meTotalLikes').textContent = data.totalLikes || 0;
-
-    // 주간 기분 분포
-    const weekMoods = data.weekMoods || {};
-    const total = Object.values(weekMoods).reduce((a, b) => a + b, 0);
-    $('meWeekCount').textContent = total;
-    if (total > 0) {
-      $('weekBar').innerHTML = Object.entries(weekMoods).map(([k, n]) =>
-        `<div style="flex:${n};background:${moodOf(k).color}"></div>`).join('');
-      $('weekLegend').innerHTML = Object.entries(weekMoods).map(([k, n]) =>
-        `<span><i style="background:${moodOf(k).color}"></i>${moodOf(k).label} ${n}</span>`).join('');
-      // 가장 많은 기분으로 위로 코멘트
-      const topMoodKey = Object.entries(weekMoods).sort((a, b) => b[1] - a[1])[0][0];
-      const top = moodOf(topMoodKey);
-      $('weekComment').textContent = `${top.label}이 많은 한 주였어요 — 오늘은 평온한 방울 하나 어때요?`;
-    } else {
-      $('weekBar').innerHTML = '<div style="flex:1;background:var(--ink-100)"></div>';
-      $('weekLegend').innerHTML = '';
-      $('weekComment').textContent = '이번 주 첫 방울을 날려보세요 🫧';
-    }
-
-    // 방울 목록
-    const bubbles = data.bubbles || [];
-    myBubbleIds = new Set(bubbles.map(b => b.id));
-    $('myList').innerHTML = bubbles.length === 0
-      ? '<div style="color:var(--ink-300);font-size:var(--font-size-caption);font-weight:600;margin-top:16px;line-height:1.7">아직 날린 방울이 없어요 🫧<br>첫 방울을 하늘로 띄워보세요</div>'
-      : bubbles.map(b => `
-        <div class="my-bubble-row ${b.expired ? 'gone' : ''}" data-id="${b.id}">
-          <span class="bd" style="background:${moodOf(b.mood).color}"></span>
-          <p>${b.text || '말 없이 날린 방울'}</p>
-          <span class="meta">${relTime(b.createdAt)} · 공감 ${b.likes}</span>
-        </div>`).join('');
-
-    // 길게 누르면 삭제
-    $('myList').querySelectorAll('.my-bubble-row').forEach(row => {
-      let pressTimer;
-      row.addEventListener('pointerdown', () => {
-        pressTimer = setTimeout(async () => {
-          if (!confirm('이 방울을 즉시 삭제할까요?')) return;
-          const id = row.dataset.id;
-          await apiFetch('/api/me', { method: 'POST', body: JSON.stringify({ action: 'delete', id }) }).catch(() => {});
-          row.remove();
-        }, 600);
-      });
-      row.addEventListener('pointerup', () => clearTimeout(pressTimer));
-      row.addEventListener('pointercancel', () => clearTimeout(pressTimer));
-    });
-
+    meCache = data;
+    renderMe(data);
     trackScreen({ log_name: 'my_bubbles' });
   } catch (_) {
-    // MOCK 폴백
-    $('meNick').textContent = '몽글몽글 구름술사';
-    $('meTotalLikes').textContent = 23;
-    $('meWeekCount').textContent = 7;
-    $('weekBar').innerHTML = '<div style="flex:3;background:var(--bg-gray-300)"></div><div style="flex:2;background:var(--mint-400)"></div><div style="flex:1;background:var(--toss-yellow)"></div><div style="flex:1;background:var(--toss-blue)"></div>';
-    $('weekLegend').innerHTML = '<span><i style="background:var(--bg-gray-300)"></i>피곤 3</span><span><i style="background:var(--mint-400)"></i>평온 2</span><span><i style="background:var(--toss-yellow)"></i>기쁨 1</span><span><i style="background:var(--toss-blue)"></i>우울 1</span>';
-    $('weekComment').textContent = '피곤이 많은 한 주였어요 — 오늘은 평온한 방울 하나 어때요?';
+    if (!meCache) {
+      // 캐시도 없을 때만 MOCK
+      $('meNick').textContent = '몽글몽글 구름술사';
+      $('meTotalLikes').textContent = 23;
+      $('meWeekCount').textContent = 7;
+      $('weekBar').innerHTML = '<div style="flex:3;background:var(--bg-gray-300)"></div><div style="flex:2;background:var(--mint-400)"></div><div style="flex:1;background:var(--toss-yellow)"></div><div style="flex:1;background:var(--toss-blue)"></div>';
+      $('weekLegend').innerHTML = '<span><i style="background:var(--bg-gray-300)"></i>피곤 3</span><span><i style="background:var(--mint-400)"></i>평온 2</span><span><i style="background:var(--toss-yellow)"></i>기쁨 1</span><span><i style="background:var(--toss-blue)"></i>우울 1</span>';
+      $('weekComment').textContent = '피곤이 많은 한 주였어요 — 오늘은 평온한 방울 하나 어때요?';
+    }
   }
   renderBlowCount();
 }
